@@ -1,7 +1,7 @@
 /**
  * 
  */
-package neuralNetwork_v2;
+package neuralNetworkTrainer;
 
 import java.util.ArrayList;
 

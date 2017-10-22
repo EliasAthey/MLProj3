@@ -1,7 +1,7 @@
 /**
  * 
  */
-package neuralNetwork_v2;
+package neuralNetworkTrainer;
 
 /**
  * Defines how a Node computes an output
