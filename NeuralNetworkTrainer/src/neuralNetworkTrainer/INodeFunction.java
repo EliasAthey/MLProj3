@@ -17,4 +17,10 @@ interface INodeFunction {
 	 * @return the computed output of the given node
 	 */
 	public Double execute(Node node);
+	
+	/**
+	 * Returns the derivative of the node funtion on the node's output
+	 * @return the derivative of the node funtion computed on the output
+	 */
+	public Double getDerivative();
 }

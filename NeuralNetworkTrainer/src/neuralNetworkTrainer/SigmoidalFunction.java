@@ -9,6 +9,11 @@ package neuralNetworkTrainer;
  */
 class SigmoidalFunction implements INodeFunction{
 
+	/**
+	 * The derivative of the sigmoid function (x*(1-x)) computed on the output after the node is activated
+	 */
+	private Double derivative;
+	
 	/*
 	 * (non-Javadoc)
 	 * @see neuralNetworkTrainer.INodeFunction#execute(neuralNetworkTrainer.Node)
@@ -20,6 +25,17 @@ class SigmoidalFunction implements INodeFunction{
 		for(int inputIter = 0; inputIter < node.getInputs().size(); inputIter++){
 			weightedSum += node.getInputs().get(inputIter) * node.getWeights().get(inputIter);
 		}
-		return 1 / (1 + Math.exp(-1 * weightedSum));
+		Double output = 1 / (1 + Math.exp(-1 * weightedSum));
+		this.derivative = output * (1 - output);
+		return output;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see neuralNetworkTrainer.INodeFunction#getDerivative()
+	 */
+	@Override
+	public Double getDerivative() {
+		return this.derivative;
 	}
 }

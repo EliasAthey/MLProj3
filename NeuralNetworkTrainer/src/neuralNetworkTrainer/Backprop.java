@@ -87,7 +87,7 @@ class Backprop extends TrainingAlgorithm {
 		
 		// get sample dataset
 		int numInputs = network.getInputLayer().getNodes().size();
-		int sampleSize = (int)(Math.pow(1.8, numInputs) * 100000);
+		int sampleSize = (int)(Math.pow(1.8, numInputs) * 10000);
 		ArrayList<ArrayList<Double>> dataset = Rosenbrock.getRosenbrockSample(sampleSize, numInputs);
 		
 		// iterate over each sample datapoint
@@ -107,17 +107,20 @@ class Backprop extends TrainingAlgorithm {
 			// execute the nodes in the network and save computed output
 			ArrayList<Double> computedOutput = this.executeNodes(network);
 			
-			// print squared error
-			ArrayList<Double> squaredError = this.getSquaredError(network, expectedOutput);
-			for(int i = 0; i < squaredError.size(); i++){
-				System.out.println("Squared error for output node " + i + ": " + squaredError.get(i));
+			// print squared error every 10000 samples
+			if(samplePointIter % 10000 == 0){
+				ArrayList<Double> squaredError = this.getSquaredError(expectedOutput, computedOutput);
+				for(int i = 0; i < squaredError.size(); i++){
+					System.out.println("Expected: " + expectedOutput.get(0) + "\nComputed: " + computedOutput.get(0));
+					System.out.println("Squared error for output node " + i + ": " + squaredError.get(i) + "\n");
+				}
 			}
 			
 			// set delta values then update weights
 			this.setOutputDeltas(network, expectedOutput);
 			this.setHiddenDeltas(network);
-			this.updateHiddenNodeWeights(network);
 			this.updateFinalNodeWeights(network, expectedOutput);
+			this.updateHiddenNodeWeights(network);
 			
 			samplePointIter++;
 		}
@@ -153,11 +156,11 @@ class Backprop extends TrainingAlgorithm {
 	 * @param expectedOutput the output defined by the sample
 	 * @return the squared error between the network's computed output and the sample expected output
 	 */
-	private ArrayList<Double> getSquaredError(Network network, ArrayList<Double> expectedOutput){
+	private ArrayList<Double> getSquaredError(ArrayList<Double> expectedOutput, ArrayList<Double> computedOutput){
 		
 		ArrayList<Double> squaredError = new ArrayList<Double>();
 		for(int outputIter = 0; outputIter < expectedOutput.size(); outputIter++){
-			Double error =  Math.pow(expectedOutput.get(outputIter) - network.getOutputLayer().getNodes().get(outputIter).getComputedOutput(), 2);
+			Double error =  Math.pow(expectedOutput.get(outputIter) - computedOutput.get(outputIter), 2);
 			squaredError.add(outputIter, error);
 		}
 		return squaredError;
@@ -173,7 +176,7 @@ class Backprop extends TrainingAlgorithm {
 		for(Node outputNode : network.getOutputLayer().getNodes()){
 			Double expected = expectedOutput.get(outputNode.getIndexInLayer());
 			Double computed = outputNode.getComputedOutput();
-			Double delta = expected - computed;
+			Double delta = (expected - computed) * outputNode.getDerivative();
 			outputNode.setBackpropDelta(delta);
 		}
 	}
@@ -191,7 +194,7 @@ class Backprop extends TrainingAlgorithm {
 				for(Node downstreamNode : hiddenNode.getDownstreamNodes()){
 					downstreamSum += (downstreamNode.getBackpropDelta() * downstreamNode.getWeights().get(hiddenNode.getIndexInLayer()));
 				}
-				hiddenNode.setBackpropDelta(computed * (1.0 - computed) * downstreamSum);
+				hiddenNode.setBackpropDelta(downstreamSum * hiddenNode.getDerivative());
 			}
 		}
 	}

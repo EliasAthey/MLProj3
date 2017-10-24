@@ -128,4 +128,12 @@ class Node {
 			downstreamNode.getInputs().add(this.indexInLayer, this.computedOutput);
 		}
 	}
+	
+	/**
+	 * Gets the derivative of the activation function computed on the output
+	 * @return the derivative of the activation function computed on the output
+	 */
+	Double getDerivative(){
+		return this.nodeFunction.getDerivative();
+	}
 }
