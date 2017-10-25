@@ -79,66 +79,110 @@ class Backprop extends TrainingAlgorithm {
 	@Override
 	Network train() {
 		
-		/**
-		 * TODO
-		 * 
-		 * train network
-		 * return resulting network
-		 */
-		
 		// initialize network
 		Network network = this.initializeNetwork();
 		
-		// all the serialzed networks (weights) of a single run
-		ArrayList<ArrayList<ArrayList<Double>>> allWeights = new ArrayList<ArrayList<ArrayList<Double>>>();
-		
-		// get sample dataset
-		int numInputs = network.getInputLayer().getNodes().size();
-		int sampleSize = (int)(Math.pow(1.8, numInputs) * 10000);
-		ArrayList<ArrayList<Double>> dataset = Rosenbrock.getRosenbrockSample(sampleSize, numInputs);
-		
-		// iterate over each sample datapoint
-		int samplePointIter = 0;
-		for(ArrayList<Double> samplePoint : dataset){
+		// do until convergence
+		boolean converged = false;
+		while(!converged){
 			
-			// set inputs and expected output
-			for(int inputIter = 0; inputIter < samplePoint.size() - 1; inputIter++){
-				if(samplePointIter > 0){
-					network.getInputLayer().getNodes().get(inputIter).getInputs().clear();
-				}
-				network.getInputLayer().getNodes().get(inputIter).getInputs().add(samplePoint.get(inputIter));
-			}
+			// holds the last computed output
+			ArrayList<Double> computedOutput = new ArrayList<Double>();
+			
+			// holds the last expected output
 			ArrayList<Double> expectedOutput = new ArrayList<Double>();
-			expectedOutput.add(samplePoint.get(samplePoint.size() - 1));
 			
-			// execute the nodes in the network and save computed output
-			ArrayList<Double> computedOutput = this.executeNodes(network);
+			// all the serialzed networks (weights) of a single run
+			ArrayList<ArrayList<ArrayList<Double>>> allWeights = new ArrayList<ArrayList<ArrayList<Double>>>();
 			
-			// print squared error every 10000 samples
-			if(samplePointIter % 10000 == 0){
+			// get sample dataset
+			int numInputs = network.getInputLayer().getNodes().size();
+			int sampleSize = (int)(Math.pow(1.8, numInputs) * 10000);
+			ArrayList<ArrayList<Double>> dataset = Rosenbrock.getRosenbrockSample(sampleSize, numInputs);
+			
+			// iterate over each sample datapoint
+			int samplePointIter = 0;
+			for(ArrayList<Double> samplePoint : dataset){
+				
+				// set inputs and expected output
+				for(int inputIter = 0; inputIter < samplePoint.size() - 1; inputIter++){
+					if(network.getInputLayer().getNodes().get(inputIter).getInputs().size() != 0){
+						network.getInputLayer().getNodes().get(inputIter).getInputs().clear();
+					}
+					network.getInputLayer().getNodes().get(inputIter).getInputs().add(samplePoint.get(inputIter));
+				}
+				expectedOutput = new ArrayList<Double>();
+				expectedOutput.add(samplePoint.get(samplePoint.size() - 1));
+				
+				// execute the nodes in the network and save computed output
+				computedOutput = this.executeNodes(network);
+				
+//				// print squared error every 10000 samples
+//				if(samplePointIter % 10000 == 0){
+//					ArrayList<Double> squaredError = this.getSquaredError(expectedOutput, computedOutput);
+//					for(int i = 0; i < squaredError.size(); i++){
+//						System.out.println("Expected: " + expectedOutput.get(0) + "\nComputed: " + computedOutput.get(0));
+//						System.out.println("Squared error for output node " + i + ": " + squaredError.get(i) + "\n");
+//					}
+//				}
+				
+				// Save original weights
+				ArrayList<ArrayList<Double>> originalWeights = (ArrayList<ArrayList<Double>>)Network.serializeNetwork(network).clone();
+				
+				// set delta values then update weights
+				this.setOutputDeltas(network, expectedOutput);
+				this.setHiddenDeltas(network);
+				this.updateFinalNodeWeights(network, expectedOutput);
+				this.updateHiddenNodeWeights(network);
+				
+				// Save updated weights
+				allWeights.add(Network.serializeNetwork(network));
+				
+				// Reset to original weights
+				network.setWeights(originalWeights);
+				
+				samplePointIter++;
+			}
+			
+			// find average of all weights
+			ArrayList<ArrayList<Double>> averagedWeights = new ArrayList<ArrayList<Double>>();
+			int numWeights = 0;
+			for(ArrayList<ArrayList<Double>> weights : allWeights){
+				numWeights++;
+				int nodeIter = 0;
+				for(ArrayList<Double> weightVector : weights){
+					if(numWeights == 1){
+						averagedWeights.add(nodeIter, weightVector);
+					}
+					else{
+						for(int weightIter = 0; weightIter < weightVector.size(); weightIter++){
+							Double current = averagedWeights.get(nodeIter).get(weightIter);
+							current += weightVector.get(weightIter);
+						}
+					}
+					nodeIter++;
+				}
+			}
+			for(ArrayList<Double> weightVectors : averagedWeights){
+				for(Double weight : weightVectors){
+					weight = weight / numWeights;
+				}
+			}
+			
+			// check convergence
+			if(!this.hasConverged(network)){
+				network.setWeights(averagedWeights);
+				
+				// print error
 				ArrayList<Double> squaredError = this.getSquaredError(expectedOutput, computedOutput);
 				for(int i = 0; i < squaredError.size(); i++){
 					System.out.println("Expected: " + expectedOutput.get(0) + "\nComputed: " + computedOutput.get(0));
 					System.out.println("Squared error for output node " + i + ": " + squaredError.get(i) + "\n");
 				}
 			}
-			
-			// Save original weights
-			ArrayList<ArrayList<Double>> originalWeights = (ArrayList<ArrayList<Double>>)Network.serializeNetwork(network).clone();
-			
-			// set delta values then update weights
-			this.setOutputDeltas(network, expectedOutput);
-			this.setHiddenDeltas(network);
-			this.updateFinalNodeWeights(network, expectedOutput);
-			this.updateHiddenNodeWeights(network);
-			
-			// Save updated weights
-			allWeights.add(Network.serializeNetwork(network));
-			
-			// Reset to original weights
-			network.setWeights(originalWeights);
-			
-			samplePointIter++;
+			else{
+				break;
+			}
 		}
 		
 		return network;
@@ -165,6 +209,18 @@ class Backprop extends TrainingAlgorithm {
 			networkOutput.add(outputNode.getComputedOutput());
 		}
 		return networkOutput;
+	}
+	
+	/**
+	 * Determines if the given network's weights have converged
+	 * @param network the network to check
+	 * @return true if the network has converged
+	 */
+	private boolean hasConverged(Network network){
+		/**
+		 * TODO
+		 */
+		return false;
 	}
 	
 	/**
