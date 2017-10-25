@@ -89,20 +89,27 @@ class Network {
 	}
 	
 	/**
-	 * Creates a weighted adjacency matrix representing this network in its current state
+	 * Creates a weighted adjacency "matrix" (really a list of lists) representing this network in its current state.
 	 * @param network the network to serialize
-	 * @return an adjacency matrix representing this network and its weight
+	 * @return an adjacency "matrix" representing this network and its weights.
+	 * 		   The top-level list contains an entry for each node; index 0 is the first input node; the final index is the final output node.
+	 * 		   The sub-list contains weights for the top-level index Node (ie list.get(A) is the weights of node A).
 	 */
-	public static Double[][] serializeToMatrix(Network network){
+	public static ArrayList<ArrayList<Double>> serializeNetwork(Network network){
 		
-		/**
-		 * TODO
-		 * 
-		 * # columns, # rows = # nodes in network
-		 * matrix will be upper triangular and all zero on diagonal so it has no cycles
-		 * 
-		 */
-		return null;
+		ArrayList<ArrayList<Double>> weights = new ArrayList<ArrayList<Double>>();
+		for(Node node : network.inputLayer.getNodes()){
+			weights.add(node.getWeights());
+		}
+		for(Layer hiddenLayer : network.getHiddenLayers()){
+			for(Node node : hiddenLayer.getNodes()){
+				weights.add(node.getWeights());
+			}
+		}
+		for(Node node : network.outputLayer.getNodes()){
+			weights.add(node.getWeights());
+		}
+		return weights;
 	}
 	
 	/**
@@ -110,7 +117,7 @@ class Network {
 	 * @param matrix the weighted adjacency matrix representing a network
 	 * @return the network represented by the weighted adjacency matrix
 	 */
-	public static Network deserializeToNetwork(Double[][] matrix){
+	public static Network deserializeToNetwork(ArrayList<ArrayList<Double>> weights){
 		
 		/**
 		 * TODO
