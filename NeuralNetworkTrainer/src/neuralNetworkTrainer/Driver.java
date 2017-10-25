@@ -52,7 +52,7 @@ class Driver {
 		// test backprop
 		ArrayList<Integer> config = new ArrayList<Integer>();
 		config.add(0, 2);// inputs
-		config.add(1, 20);// first hidden layer
+		config.add(1, 50);// first hidden layer
 		config.add(2, 1);// output
 		Double learningRate = 0.001;
 		Driver.trainingAlgorithm = new Backprop(config, learningRate);

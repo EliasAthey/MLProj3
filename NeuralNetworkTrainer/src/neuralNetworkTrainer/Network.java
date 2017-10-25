@@ -95,19 +95,19 @@ class Network {
 	 * 		   The top-level list contains an entry for each node; index 0 is the first input node; the final index is the final output node.
 	 * 		   The sub-list contains weights for the top-level index Node (ie list.get(A) is the weights of node A).
 	 */
-	public static ArrayList<ArrayList<Double>> serializeNetwork(Network network){
+	static ArrayList<ArrayList<Double>> serializeNetwork(Network network){
 		
 		ArrayList<ArrayList<Double>> weights = new ArrayList<ArrayList<Double>>();
 		for(Node node : network.inputLayer.getNodes()){
-			weights.add(node.getWeights());
+			weights.add((ArrayList<Double>)node.getWeights().clone());
 		}
 		for(Layer hiddenLayer : network.getHiddenLayers()){
 			for(Node node : hiddenLayer.getNodes()){
-				weights.add(node.getWeights());
+				weights.add((ArrayList<Double>)node.getWeights().clone());
 			}
 		}
 		for(Node node : network.outputLayer.getNodes()){
-			weights.add(node.getWeights());
+			weights.add((ArrayList<Double>)node.getWeights().clone());
 		}
 		return weights;
 	}
@@ -117,7 +117,7 @@ class Network {
 	 * @param matrix the weighted adjacency matrix representing a network
 	 * @return the network represented by the weighted adjacency matrix
 	 */
-	public static Network deserializeToNetwork(ArrayList<Integer> configuration, ArrayList<ArrayList<Double>> weights){
+	static Network deserializeToNetwork(ArrayList<Integer> configuration, ArrayList<ArrayList<Double>> weights){
 		
 		Network network = new Network(configuration);
 		network.setWeights(weights);
