@@ -117,14 +117,45 @@ class Network {
 	 * @param matrix the weighted adjacency matrix representing a network
 	 * @return the network represented by the weighted adjacency matrix
 	 */
-	public static Network deserializeToNetwork(ArrayList<ArrayList<Double>> weights){
+	public static Network deserializeToNetwork(ArrayList<Integer> configuration, ArrayList<ArrayList<Double>> weights){
 		
-		/**
-		 * TODO
-		 * 
-		 * create network
-		 */
-		return null;
+		Network network = new Network(configuration);
+		network.setWeights(weights);
+		return network;
+	}
+	
+	/**
+	 * Sets the weights in this network
+	 * @param weights the weight "matrix" (list of lists) representing the weights
+	 * 		  The top-level list should contain an entry for each node; index 0 is the first input node; the final index is the final output node.
+	 * 		  The sub-list should contain the weights for the top-level index Node (ie list.get(A) is the weights of node A).
+	 */
+	void setWeights(ArrayList<ArrayList<Double>> weights){
+		
+		int weightsIter = 0;
+		for(Node node : this.inputLayer.getNodes()){
+			node.getWeights().clear();
+			for(Double weight : weights.get(weightsIter)){
+				node.getWeights().add(weight);
+			}
+			weightsIter++;
+		}
+		for(Layer hiddenLayer : this.getHiddenLayers()){
+			for(Node node : hiddenLayer.getNodes()){
+				node.getWeights().clear();
+				for(Double weight : weights.get(weightsIter)){
+					node.getWeights().add(weight);
+				}
+				weightsIter++;
+			}
+		}
+		for(Node node : this.outputLayer.getNodes()){
+			node.getWeights().clear();
+			for(Double weight : weights.get(weightsIter)){
+				node.getWeights().add(weight);
+			}
+			weightsIter++;
+		}
 	}
 }
 
