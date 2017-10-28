@@ -20,7 +20,12 @@ class Node {
 	 * the associated weights to the inputs
 	 */
 	private ArrayList<Double> weights;
-	
+
+	/**
+	 * the previous change in weights
+	 */
+	private ArrayList<Double> prevWeightChange;
+
 	/**
 	 * the downstream nodes
 	 */
@@ -55,6 +60,7 @@ class Node {
 	Node(INodeFunction nodeFunction, ArrayList<Node> downstreamNodes, int indexInLayer){
 		this.inputs = new ArrayList<Double>();
 		this.weights = new ArrayList<Double>();
+		this.prevWeightChange = new ArrayList<Double>();
 		this.downstream = downstreamNodes;
 		this.nodeFunction = nodeFunction;
 		this.indexInLayer = indexInLayer;
@@ -75,6 +81,12 @@ class Node {
 	ArrayList<Double> getWeights(){
 		return this.weights;
 	}
+
+	/**
+	 * Gets the previous changes in weights of this node
+	 * @return the previous changes in weights of this node
+	 */
+	ArrayList<Double> getPrevWeightChange(){ return this.prevWeightChange; }
 	
 	/**
 	 * Gets the downstream nodes of this node
@@ -110,7 +122,7 @@ class Node {
 	
 	/**
 	 * Sets the backprop delta value of this node
-	 * @param the backprop delta value to set for this node
+	 * @param delta Sthe backprop delta value to set for this node
 	 */
 	void setBackpropDelta(Double delta){
 		this.backpropDelta = delta;

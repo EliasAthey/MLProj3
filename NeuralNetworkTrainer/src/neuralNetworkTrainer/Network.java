@@ -114,13 +114,14 @@ class Network {
 	
 	/**
 	 * Creates a Network given a representative weighted adjacency matrix
-	 * @param matrix the weighted adjacency matrix representing a network
+	 * @param configuration the configuration fo the network
+	 * @param weights matrix the weighted adjacency matrix representing a network
 	 * @return the network represented by the weighted adjacency matrix
 	 */
 	static Network deserializeToNetwork(ArrayList<Integer> configuration, ArrayList<ArrayList<Double>> weights){
 		
 		Network network = new Network(configuration);
-		network.setWeights(weights);
+		network.setWeights(weights, false);
 		return network;
 	}
 	
@@ -129,30 +130,61 @@ class Network {
 	 * @param weights the weight "matrix" (list of lists) representing the weights
 	 * 		  The top-level list should contain an entry for each node; index 0 is the first input node; the final index is the final output node.
 	 * 		  The sub-list should contain the weights for the top-level index Node (ie list.get(A) is the weights of node A).
+	 * @param isWeightChange if true, sets the prevWeightChange of the nodes instead
 	 */
-	void setWeights(ArrayList<ArrayList<Double>> weights){
-		
+	void setWeights(ArrayList<ArrayList<Double>> weights, Boolean isWeightChange){
+
 		int weightsIter = 0;
 		for(Node node : this.inputLayer.getNodes()){
-			node.getWeights().clear();
+			if(isWeightChange){
+				node.getPrevWeightChange().clear();
+			}
+			else{
+				node.getWeights().clear();
+			}
 			for(Double weight : weights.get(weightsIter)){
-				node.getWeights().add(weight);
+				if(isWeightChange){
+					node.getPrevWeightChange().add(weight);
+				}
+				else{
+					node.getWeights().add(weight);
+				}
 			}
 			weightsIter++;
 		}
 		for(Layer hiddenLayer : this.getHiddenLayers()){
 			for(Node node : hiddenLayer.getNodes()){
-				node.getWeights().clear();
+				if(isWeightChange){
+					node.getPrevWeightChange().clear();
+				}
+				else{
+					node.getWeights().clear();
+				}
 				for(Double weight : weights.get(weightsIter)){
-					node.getWeights().add(weight);
+					if(isWeightChange){
+						node.getPrevWeightChange().add(weight);
+					}
+					else{
+						node.getWeights().add(weight);
+					}
 				}
 				weightsIter++;
 			}
 		}
 		for(Node node : this.outputLayer.getNodes()){
-			node.getWeights().clear();
+			if(isWeightChange){
+				node.getPrevWeightChange().clear();
+			}
+			else{
+				node.getWeights().clear();
+			}
 			for(Double weight : weights.get(weightsIter)){
-				node.getWeights().add(weight);
+				if(isWeightChange){
+					node.getPrevWeightChange().add(weight);
+				}
+				else{
+					node.getWeights().add(weight);
+				}
 			}
 			weightsIter++;
 		}

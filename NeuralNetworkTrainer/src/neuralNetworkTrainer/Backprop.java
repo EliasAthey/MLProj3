@@ -23,7 +23,7 @@ class Backprop extends TrainingAlgorithm {
 	
 //	needs to be a delta value for each node
 //	/**
-//	 * the deltavalues for each layer in the network
+//	 * the delta values for each layer in the network
 //	 */
 //	private ArrayList<Double> deltaValues;
 	
@@ -38,15 +38,15 @@ class Backprop extends TrainingAlgorithm {
 	}
 	
 	/**
-	 * Intializes a network with weights
-	 * @return the intialized network
+	 * Initializes a network with weights
+	 * @return the initialized network
 	 */
 	private Network initializeNetwork(){
 		
 		// construct network
 		Network network = new Network(this.configuration);
 
-		// set input weights to 1.0, hidden and output weights between -0.5 and +0.5
+		// set input weights to 1.0, hidden and output weights between -0.5 and +0.5, prevWeightChange to 0.
 		ArrayList<ArrayList<Double>> weights = new ArrayList<ArrayList<Double>>();
 		for(int inputIter = 0; inputIter < this.configuration.get(0); inputIter++){
 			ArrayList<Double> weightVector = new ArrayList<Double>();
@@ -69,7 +69,7 @@ class Backprop extends TrainingAlgorithm {
 			}
 			weights.add(weightVector);
 		}
-		network.setWeights(weights);
+		network.setWeights(weights, false);
 		return network;
 	}
 
@@ -92,15 +92,15 @@ class Backprop extends TrainingAlgorithm {
 			// holds the last expected output
 			ArrayList<Double> expectedOutput = new ArrayList<Double>();
 			
-			// all the serialzed networks (weights) of a single run
+			// all the serialized networks (weights) of a single run
 			ArrayList<ArrayList<ArrayList<Double>>> allWeights = new ArrayList<ArrayList<ArrayList<Double>>>();
 			
-			// get sample dataset
+			// get sample data set
 			int numInputs = network.getInputLayer().getNodes().size();
 			int sampleSize = (int)(Math.pow(1.8, numInputs) * 10000);
 			ArrayList<ArrayList<Double>> dataset = Rosenbrock.getRosenbrockSample(sampleSize, numInputs);
 			
-			// iterate over each sample datapoint
+			// iterate over each sample data point
 			int samplePointIter = 0;
 			for(ArrayList<Double> samplePoint : dataset){
 				
@@ -139,7 +139,7 @@ class Backprop extends TrainingAlgorithm {
 				allWeights.add(Network.serializeNetwork(network));
 				
 				// Reset to original weights
-				network.setWeights(originalWeights);
+				network.setWeights(originalWeights, false);
 				
 				samplePointIter++;
 			}
@@ -171,7 +171,7 @@ class Backprop extends TrainingAlgorithm {
 			
 			// check convergence
 			if(!this.hasConverged(network)){
-				network.setWeights(averagedWeights);
+				network.setWeights(averagedWeights, false);
 				
 				// print error
 				ArrayList<Double> squaredError = this.getSquaredError(expectedOutput, computedOutput);
