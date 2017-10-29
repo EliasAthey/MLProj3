@@ -210,6 +210,7 @@ class Backprop extends TrainingAlgorithm {
 				for(int i = 0; i < averagedErrors.size(); i++){
 					System.out.println("Average squared error for output node " + i + ": " + averagedErrors.get(i) + "\n");
 				}
+				squaredErrors.clear();
 			}
 			else{
 				// break out of while loop if we have converged
