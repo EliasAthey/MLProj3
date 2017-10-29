@@ -134,15 +134,6 @@ class Backprop extends TrainingAlgorithm {
 				// execute the nodes in the network and save computed output
 				computedOutput = this.executeNodes(network);
 				
-//				// print squared error every 10000 samples
-//				if(samplePointIter % 10000 == 0){
-//					ArrayList<Double> squaredError = this.getSquaredError(expectedOutput, computedOutput);
-//					for(int i = 0; i < squaredError.size(); i++){
-//						System.out.println("Expected: " + expectedOutput.get(0) + "\nComputed: " + computedOutput.get(0));
-//						System.out.println("Squared error for output node " + i + ": " + squaredError.get(i) + "\n");
-//					}
-//				}
-				
 				// Save original weights
 				ArrayList<ArrayList<Double>> originalWeights = (ArrayList<ArrayList<Double>>)Network.serializeNetwork(network).clone();
 				
@@ -188,12 +179,34 @@ class Backprop extends TrainingAlgorithm {
 			
 			// check convergence
 			if(!this.hasConverged(network)){
+				ArrayList<ArrayList<Double>> originalWieghts = (ArrayList<ArrayList<Double>>)Network.serializeNetwork(network);
+				network.setWeights(this.getChangeInWeights(averagedWeights, originalWieghts), true);
 				network.setWeights(averagedWeights, false);
+
+				// print previous weights
+				System.out.println("Previous Weights");
+				for(ArrayList<Double> node : originalWieghts){
+					System.out.print("Node: ");
+					for(Double weight : node){
+						System.out.print(weight + " ");
+					}
+					System.out.print("\n");
+				}
+
+				// print new weights
+				System.out.println("\nNew Weights");
+				for(ArrayList<Double> node : averagedWeights){
+					System.out.print("Node: ");
+					for(Double weight : node){
+						System.out.print(weight + " ");
+					}
+					System.out.print("\n");
+				}
 				
 				// print error
 				ArrayList<Double> squaredError = this.getSquaredError(expectedOutput, computedOutput);
 				for(int i = 0; i < squaredError.size(); i++){
-					System.out.println("Expected: " + expectedOutput.get(0) + "\nComputed: " + computedOutput.get(0));
+					System.out.println("\nExpected: " + expectedOutput.get(0) + "\nComputed: " + computedOutput.get(0));
 					System.out.println("Squared error for output node " + i + ": " + squaredError.get(i) + "\n");
 				}
 			}
@@ -203,6 +216,25 @@ class Backprop extends TrainingAlgorithm {
 		}
 		
 		return network;
+	}
+
+	/**
+	 * Gets the list of lists of differences in weights
+	 * @param newWeights the new weight matrix
+	 * @param oldWeights the previous weight matrix
+	 * @return the matrix of differences
+	 */
+	private ArrayList<ArrayList<Double>> getChangeInWeights(ArrayList<ArrayList<Double>> newWeights, ArrayList<ArrayList<Double>> oldWeights){
+
+		ArrayList<ArrayList<Double>> change = new ArrayList<>();
+		for(int nodeIter = 0; nodeIter < newWeights.size(); nodeIter++){
+			change.add(nodeIter, new ArrayList<Double>());
+			for(int weightIter = 0; weightIter < newWeights.get(nodeIter).size(); weightIter++){
+				Double difference = newWeights.get(nodeIter).get(weightIter) - oldWeights.get(nodeIter).get(weightIter);
+				change.get(nodeIter).add(difference);
+			}
+		}
+		return change;
 	}
 	
 	/**
