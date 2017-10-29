@@ -114,7 +114,7 @@ class Backprop extends TrainingAlgorithm {
 			
 			// get sample data set
 			int numInputs = network.getInputLayer().getNodes().size();
-			int sampleSize = (int)(Math.pow(1.8, numInputs) * 10000);
+			int sampleSize = (int)(Math.pow(1.8, numInputs) * 100000);
 			ArrayList<ArrayList<Double>> dataset = Rosenbrock.getRosenbrockSample(sampleSize, numInputs);
 			
 			// iterate over each sample data point
@@ -144,7 +144,7 @@ class Backprop extends TrainingAlgorithm {
 				this.updateHiddenNodeWeights(network);
 				
 				// Save updated weights
-				allWeights.add(Network.serializeNetwork(network));
+				allWeights.add((ArrayList<ArrayList<Double>>)Network.serializeNetwork(network).clone());
 				
 				// Reset to original weights
 				network.setWeights(originalWeights, false);
@@ -183,25 +183,25 @@ class Backprop extends TrainingAlgorithm {
 				network.setWeights(this.getChangeInWeights(averagedWeights, originalWieghts), true);
 				network.setWeights(averagedWeights, false);
 
-				// print previous weights
-				System.out.println("Previous Weights");
-				for(ArrayList<Double> node : originalWieghts){
-					System.out.print("Node: ");
-					for(Double weight : node){
-						System.out.print(weight + " ");
-					}
-					System.out.print("\n");
-				}
-
-				// print new weights
-				System.out.println("\nNew Weights");
-				for(ArrayList<Double> node : averagedWeights){
-					System.out.print("Node: ");
-					for(Double weight : node){
-						System.out.print(weight + " ");
-					}
-					System.out.print("\n");
-				}
+//				// print previous weights
+//				System.out.println("Previous Weights");
+//				for(ArrayList<Double> node : originalWieghts){
+//					System.out.print("Node: ");
+//					for(Double weight : node){
+//						System.out.print(weight + " ");
+//					}
+//					System.out.print("\n");
+//				}
+//
+//				// print new weights
+//				System.out.println("\nNew Weights");
+//				for(ArrayList<Double> node : averagedWeights){
+//					System.out.print("Node: ");
+//					for(Double weight : node){
+//						System.out.print(weight + " ");
+//					}
+//					System.out.print("\n");
+//				}
 				
 				// print error
 				ArrayList<Double> squaredError = this.getSquaredError(expectedOutput, computedOutput);
