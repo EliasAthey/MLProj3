@@ -55,7 +55,8 @@ class Driver {
 		config.add(1, 50);// first hidden layer
 		config.add(2, 1);// output
 		Double learningRate = 0.001;
-		Driver.trainingAlgorithm = new Backprop(config, learningRate);
+		Double momentum = 0.1;
+		Driver.trainingAlgorithm = new Backprop(config, learningRate, momentum);
 		Driver.train();
 	}
 	
