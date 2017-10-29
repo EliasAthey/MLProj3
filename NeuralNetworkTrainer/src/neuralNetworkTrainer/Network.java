@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * @author Elias
  *
  */
-class Network {
+class  Network {
 
 	/**
 	 * The input layer

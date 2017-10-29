@@ -1,6 +1,3 @@
-/**
- * 
- */
 package neuralNetworkTrainer;
 
 import java.util.ArrayList;
@@ -56,8 +53,8 @@ class Backprop extends TrainingAlgorithm {
 		ArrayList<ArrayList<Double>> weights = new ArrayList<>();
 		ArrayList<ArrayList<Double>> weightChange = new ArrayList<>();
 		for(int inputIter = 0; inputIter < this.configuration.get(0); inputIter++){
-			ArrayList<Double> weightVector = new ArrayList<Double>();
-			ArrayList<Double> weightChangeVector = new ArrayList<Double>();
+			ArrayList<Double> weightVector = new ArrayList<>();
+			ArrayList<Double> weightChangeVector = new ArrayList<>();
 			weightVector.add(0, 1.0);
 			weightChangeVector.add(0, 0.0);
 			weights.add(weightVector);
@@ -65,8 +62,8 @@ class Backprop extends TrainingAlgorithm {
 		}
 		for(int hiddenLayerIter = 1; hiddenLayerIter < this.configuration.size() - 1; hiddenLayerIter++){
 			for(int hiddenNodeIter = 0; hiddenNodeIter < this.configuration.get(hiddenLayerIter); hiddenNodeIter++){
-				ArrayList<Double> weightVector = new ArrayList<Double>();
-				ArrayList<Double> weightChangeVector = new ArrayList<Double>();
+				ArrayList<Double> weightVector = new ArrayList<>();
+				ArrayList<Double> weightChangeVector = new ArrayList<>();
 				for(int weightIter = 0; weightIter < this.configuration.get(hiddenLayerIter - 1); weightIter++){
 					weightVector.add(weightIter, Math.pow(-1, (int)(Math.random() * 2)) * Math.random() * 0.5);
 					weightChangeVector.add(0, 0.0);
@@ -76,8 +73,8 @@ class Backprop extends TrainingAlgorithm {
 			}
 		}
 		for(int outputIter = 0; outputIter < this.configuration.get(this.configuration.size() - 1); outputIter++){
-			ArrayList<Double> weightVector = new ArrayList<Double>();
-			ArrayList<Double> weightChangeVector = new ArrayList<Double>();
+			ArrayList<Double> weightVector = new ArrayList<>();
+			ArrayList<Double> weightChangeVector = new ArrayList<>();
 			for(int weightIter = 0; weightIter < this.configuration.get(this.configuration.size() - 2); weightIter++){
 				weightVector.add(weightIter, Math.pow(-1, (int)(Math.random() * 2)) * Math.random() * 0.5);
 				weightChangeVector.add(0, 0.0);
@@ -100,17 +97,16 @@ class Backprop extends TrainingAlgorithm {
 		Network network = this.initializeNetwork();
 		
 		// do until convergence
-		boolean converged = false;
-		while(!converged){
+		while(true){
 			
 			// holds the last computed output
-			ArrayList<Double> computedOutput = new ArrayList<Double>();
+			ArrayList<Double> computedOutput = new ArrayList<>();
 			
 			// holds the last expected output
-			ArrayList<Double> expectedOutput = new ArrayList<Double>();
+			ArrayList<Double> expectedOutput = new ArrayList<>();
 			
 			// all the serialized networks (weights) of a single run
-			ArrayList<ArrayList<ArrayList<Double>>> allWeights = new ArrayList<ArrayList<ArrayList<Double>>>();
+			ArrayList<ArrayList<ArrayList<Double>>> allWeights = new ArrayList<>();
 			
 			// get sample data set
 			int numInputs = network.getInputLayer().getNodes().size();
@@ -128,7 +124,7 @@ class Backprop extends TrainingAlgorithm {
 					}
 					network.getInputLayer().getNodes().get(inputIter).getInputs().add(samplePoint.get(inputIter));
 				}
-				expectedOutput = new ArrayList<Double>();
+				expectedOutput = new ArrayList<>();
 				expectedOutput.add(samplePoint.get(samplePoint.size() - 1));
 				
 				// execute the nodes in the network and save computed output
@@ -140,7 +136,7 @@ class Backprop extends TrainingAlgorithm {
 				// set delta values then update weights
 				this.setOutputDeltas(network, expectedOutput);
 				this.setHiddenDeltas(network);
-				this.updateFinalNodeWeights(network, expectedOutput);
+				this.updateFinalNodeWeights(network);
 				this.updateHiddenNodeWeights(network);
 				
 				// Save updated weights
@@ -153,7 +149,7 @@ class Backprop extends TrainingAlgorithm {
 			}
 			
 			// find average of all weights
-			ArrayList<ArrayList<Double>> averagedWeights = new ArrayList<ArrayList<Double>>();
+			ArrayList<ArrayList<Double>> averagedWeights = new ArrayList<>();
 			int numWeights = 0;
 			for(ArrayList<ArrayList<Double>> weights : allWeights){
 				numWeights++;
@@ -211,6 +207,7 @@ class Backprop extends TrainingAlgorithm {
 				}
 			}
 			else{
+				// break out of while loop if we have converged
 				break;
 			}
 		}
@@ -228,7 +225,7 @@ class Backprop extends TrainingAlgorithm {
 
 		ArrayList<ArrayList<Double>> change = new ArrayList<>();
 		for(int nodeIter = 0; nodeIter < newWeights.size(); nodeIter++){
-			change.add(nodeIter, new ArrayList<Double>());
+			change.add(nodeIter, new ArrayList<>());
 			for(int weightIter = 0; weightIter < newWeights.get(nodeIter).size(); weightIter++){
 				Double difference = newWeights.get(nodeIter).get(weightIter) - oldWeights.get(nodeIter).get(weightIter);
 				change.get(nodeIter).add(difference);
@@ -252,7 +249,7 @@ class Backprop extends TrainingAlgorithm {
 				hiddenNode.activateNode();
 			}
 		}
-		ArrayList<Double> networkOutput = new ArrayList<Double>();
+		ArrayList<Double> networkOutput = new ArrayList<>();
 		for(Node outputNode : network.getOutputLayer().getNodes()){
 			outputNode.activateNode();
 			networkOutput.add(outputNode.getComputedOutput());
@@ -279,7 +276,7 @@ class Backprop extends TrainingAlgorithm {
 	 */
 	private ArrayList<Double> getSquaredError(ArrayList<Double> expectedOutput, ArrayList<Double> computedOutput){
 		
-		ArrayList<Double> squaredError = new ArrayList<Double>();
+		ArrayList<Double> squaredError = new ArrayList<>();
 		for(int outputIter = 0; outputIter < expectedOutput.size(); outputIter++){
 			Double error =  Math.pow(expectedOutput.get(outputIter) - computedOutput.get(outputIter), 2);
 			squaredError.add(outputIter, error);
@@ -310,7 +307,6 @@ class Backprop extends TrainingAlgorithm {
 		
 		for(int layerIter = network.getHiddenLayers().size() - 1; layerIter >= 0; layerIter--){
 			for(Node hiddenNode : network.getHiddenLayers().get(layerIter).getNodes()){
-				Double computed = hiddenNode.getComputedOutput();
 				Double downstreamSum = 0.0;
 				for(Node downstreamNode : hiddenNode.getDownstreamNodes()){
 					downstreamSum += (downstreamNode.getBackpropDelta() * downstreamNode.getWeights().get(hiddenNode.getIndexInLayer()));
@@ -345,9 +341,8 @@ class Backprop extends TrainingAlgorithm {
 	/**
 	 * update the weights to the final nodes
 	 * @param network the Network to update weights on
-	 * @param expectedOutput the expected output defined by the sample datapoint
 	 */
-	private void updateFinalNodeWeights(Network network, ArrayList<Double> expectedOutput){
+	private void updateFinalNodeWeights(Network network){
 		
 		for(Node outputNode : network.getOutputLayer().getNodes()){
 			for(int inputIter = 0; inputIter < outputNode.getInputs().size(); inputIter++){
