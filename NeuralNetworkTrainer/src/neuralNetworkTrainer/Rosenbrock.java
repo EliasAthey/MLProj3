@@ -15,7 +15,7 @@ class Rosenbrock {
 	/**
 	 * The range in which to generate sample data
 	 */
-	private final static Double sampleRange = 10.0;
+	private final static Double sampleRange = 3.0;
 	
 	/**
 	 * Computes the value of the Rosenbrock function on the given inputs

@@ -107,16 +107,19 @@ class Backprop extends TrainingAlgorithm {
 			
 			// all the serialized networks (weights) of a single run
 			ArrayList<ArrayList<ArrayList<Double>>> allWeights = new ArrayList<>();
+
+			// all the squared errors, used to find average
+			ArrayList<ArrayList<Double>> squaredErrors = new ArrayList<>();
 			
 			// get sample data set
 			int numInputs = network.getInputLayer().getNodes().size();
-			int sampleSize = (int)(Math.pow(1.8, numInputs) * 100000);
+			int sampleSize = (int)(Math.pow(1.8, numInputs) * 10000);
 			ArrayList<ArrayList<Double>> dataset = Rosenbrock.getRosenbrockSample(sampleSize, numInputs);
 			
 			// iterate over each sample data point
 			int samplePointIter = 0;
 			for(ArrayList<Double> samplePoint : dataset){
-				
+
 				// set inputs and expected output
 				for(int inputIter = 0; inputIter < samplePoint.size() - 1; inputIter++){
 					if(network.getInputLayer().getNodes().get(inputIter).getInputs().size() != 0){
@@ -129,6 +132,9 @@ class Backprop extends TrainingAlgorithm {
 				
 				// execute the nodes in the network and save computed output
 				computedOutput = this.executeNodes(network);
+
+				// add squared error to list
+				squaredErrors.add(samplePointIter, this.getSquaredError(expectedOutput, computedOutput));
 				
 				// Save original weights
 				ArrayList<ArrayList<Double>> originalWeights = (ArrayList<ArrayList<Double>>)Network.serializeNetwork(network).clone();
@@ -200,10 +206,9 @@ class Backprop extends TrainingAlgorithm {
 //				}
 				
 				// print error
-				ArrayList<Double> squaredError = this.getSquaredError(expectedOutput, computedOutput);
-				for(int i = 0; i < squaredError.size(); i++){
-					System.out.println("\nExpected: " + expectedOutput.get(0) + "\nComputed: " + computedOutput.get(0));
-					System.out.println("Squared error for output node " + i + ": " + squaredError.get(i) + "\n");
+				ArrayList<Double> averagedErrors = this.getAveragedSquareError(squaredErrors);
+				for(int i = 0; i < averagedErrors.size(); i++){
+					System.out.println("Average squared error for output node " + i + ": " + averagedErrors.get(i) + "\n");
 				}
 			}
 			else{
@@ -282,6 +287,26 @@ class Backprop extends TrainingAlgorithm {
 			squaredError.add(outputIter, error);
 		}
 		return squaredError;
+	}
+
+	/**
+	 * Computes the average square error given a list of errors
+	 * @param allErrors the list of all squared errors
+	 * @return the average squared error
+	 */
+	private ArrayList<Double> getAveragedSquareError(ArrayList<ArrayList<Double>> allErrors){
+
+		double[] sums = new double[allErrors.get(0).size()];
+		for(int errorIter = 0; errorIter < allErrors.size(); errorIter++){
+			for(int i = 0; i < allErrors.get(errorIter).size(); i++){
+				sums[i] += allErrors.get(errorIter).get(i);
+			}
+		}
+		ArrayList<Double> averageError = new ArrayList<>();
+		for(int sumIter = 0; sumIter < sums.length; sumIter++){
+			averageError.add(sums[sumIter] / allErrors.size());
+		}
+		return averageError;
 	}
 	
 	/**
