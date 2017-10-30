@@ -7,14 +7,17 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 
 	private int populationSize;
 
-	public ArrayList<Network> generatePopulation(ArrayList<Integer> configuration){
+	public ArrayList<Network> generatePopulation(){
 		//if this is the same for GA ES and DE  maybe we should move this functionality to TrainingAlgorithm
 		
 		ArrayList<Network> population = null;
 		
 		//create populationSize number of individuals and add them to population
 		for(int popIter = 0;  popIter < populationSize; popIter++) {
-			Network individual = new Network(configuration);
+			
+			//adding a global config in driver might be worth doing
+			//or passing config through train() to all these methods
+			Network individual = new Network(Driver.configuration);
 			population.add(individual);
 		}
 		return population;
@@ -46,6 +49,8 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 				}
 			}
 			offspring.remove(individual);
+			//adding a global config in driver might be worth doing
+			//or passing config through train() to all these methods
 			offspring.add(Network.deserializeToNetwork(Driver.configuration, matrixIndividual));
 			
 		}

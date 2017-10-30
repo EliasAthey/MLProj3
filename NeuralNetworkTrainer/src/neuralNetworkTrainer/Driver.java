@@ -15,7 +15,6 @@ class Driver {
 	 * The training algorithm to use
 	 */
 	private static TrainingAlgorithm trainingAlgorithm;
-	public static ArrayList<Integer> configuration;
 	
 //	these values will be passed to the training algorithm, not sure if we need to keep them here
 //	/**
