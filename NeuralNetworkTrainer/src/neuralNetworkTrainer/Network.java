@@ -44,7 +44,7 @@ class  Network {
 			this.outputLayer.getNodes().add(nodeIter, new Node(new LinearFunction(), new ArrayList<Node>(), nodeIter));
 		}
 		
-		// create hidden layers in reverse, starting at the second to last index of configuartion
+		// create hidden layers in reverse, starting at the second to last index of configuration
 		ArrayList<Node> downstreamNodes = this.outputLayer.getNodes();
 		for(int layerIter = configuration.size() - 2; layerIter > 0; layerIter--){
 			this.hiddenLayers.add(new Layer());

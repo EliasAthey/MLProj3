@@ -7,9 +7,19 @@ public class EvolutionStrategy extends TrainingAlgorithm {
 	private int populationSize;
 	private int numberOfOffspring;
 
-	public ArrayList<Network> generatePopulation(){
-		//TODO
-		return null;
+
+	public ArrayList<Network> generatePopulation(ArrayList<Integer> configuration){
+		
+		//if this is the same for GA ES and DE maybe we should move this functionality to TrainingAlgorithm
+		
+		ArrayList<Network> population = null;
+				
+		//create populationSize number of individuals and add them to population
+		for(int popIter = 0;  popIter < populationSize; popIter++) {
+			Network individual = new Network(configuration);
+			population.add(individual);
+		}
+		return population;
 	}
 	
 	public ArrayList<Network> selectOffspring(ArrayList<Network> population){
