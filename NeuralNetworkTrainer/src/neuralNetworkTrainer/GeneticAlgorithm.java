@@ -16,26 +16,21 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		return null;
 	}
 	
-
-	
 	public ArrayList<Network> crossoverOffspring(ArrayList<Network> offspring){
 		//TODO
 		return null;
 	}
 
-	
 	public ArrayList<Network> mutateOffspring(ArrayList<Network> offspring){
 		//TODO
 		return null;
 	}
 
-	
 	public Double evaluateFitness(Network network){
 		//TODO
 		return null;
 	}
 
-	
 	public Boolean hasConverged (ArrayList<Network> currentPopulation, ArrayList<Network> prevPopulation ){
 		//TODO
 		return null;

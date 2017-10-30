@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class DifferentialEvolution extends TrainingAlgorithm {
 
 	private int populationSize;
+	private double betaParam;
 
 	public ArrayList<Network> generatePopulation(){
 		//TODO
@@ -16,25 +17,20 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 		return null;
 	}
 	
-
-	
 	public ArrayList<Network> crossoverOffspring(ArrayList<Network> offspring){
 		//TODO
 		return null;
 	}
 
-	
 	public ArrayList<Network> mutateOffspring(ArrayList<Network> offspring){
 		//TODO
 		return null;
 	}
 
-	
 	public Double evaluateFitness(Network network){
 		//TODO
 		return null;
 	}
-
 	
 	public Boolean hasConverged (ArrayList<Network> currentPopulation, ArrayList<Network> prevPopulation ){
 		//TODO
