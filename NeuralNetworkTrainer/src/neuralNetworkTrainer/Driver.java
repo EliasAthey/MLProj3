@@ -16,7 +16,7 @@ class Driver {
 	 */
 	private static TrainingAlgorithm trainingAlgorithm;
 	
-//	these values will be passed to the training algorithm, ot sure if we need to keep them here
+//	these values will be passed to the training algorithm, not sure if we need to keep them here
 //	/**
 //	 * Backprop parameters
 //	 */
