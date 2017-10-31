@@ -4,6 +4,7 @@
 package neuralNetworkTrainer;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * @author Elias
@@ -15,6 +16,8 @@ class Driver {
 	 * The training algorithm to use
 	 */
 	private static TrainingAlgorithm trainingAlgorithm;
+	public static ArrayList<Integer> configuration;
+	public static Random randNum = new Random();
 	
 //	these values will be passed to the training algorithm, not sure if we need to keep them here
 //	/**
