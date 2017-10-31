@@ -1,6 +1,7 @@
 package neuralNetworkTrainer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 public class GeneticAlgorithm extends TrainingAlgorithm {
@@ -28,38 +29,34 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		return null;
 	}
 	
-	public ArrayList<Network> crossoverOffspring(ArrayList<Network> offspring){
+	public ArrayList<ArrayList<ArrayList<Double>>> crossoverOffspring(ArrayList<ArrayList<ArrayList<Double>>> offspring){
 		//TODO
 		return null;
 	}
 
-	public ArrayList<Network> mutateOffspring(ArrayList<Network> offspring){
+	public ArrayList<ArrayList<ArrayList<Double>>> mutateOffspring(ArrayList<ArrayList<ArrayList<Double>>> offspring){
 		double pm = .05; //mutation rate. probly store this in driver or something
-		Random randNum = new Random(); //this could be global in the driver. no reason to make one in every method that needs it
 
-		for (Network individual : offspring) {
-			ArrayList<ArrayList<Double>> matrixIndividual = Network.serializeNetwork(individual);
-			for (ArrayList<Double> chromosome : matrixIndividual) {
+		for (ArrayList<ArrayList<Double>> individual : offspring) {
+
+			for (ArrayList<Double> chromosome : individual) {
 				for(Double gene : chromosome) {
-					if (Math.random() <= pm) { //gives a pm% chance of a mutation happening on any given gene
+					if (Math.random() <= pm) { //gives a pm% chance of a mutation happening on any given gene, lower for higher fitness individuals maybe???? 
 						//change gene with a random number from a gaussian distribution 
 						//centered at 0 with a standard deviation of 1
-						gene += randNum.nextGaussian();
+						gene += Driver.randNum.nextGaussian();
 					}
 				}
 			}
-			offspring.remove(individual);
-			//adding a global config in driver might be worth doing
-			//or passing config through train() to all these methods
-			offspring.add(Network.deserializeToNetwork(Driver.configuration, matrixIndividual));
-			
 		}
 		//TODO
-		return null;
+		return offspring;
 	}
 
-	public Double evaluateFitness(Network network){
+	public Double evaluateFitness(ArrayList<Network> population){
 		//TODO
+		//calc fitness
+		
 		return null;
 	}
 
@@ -74,9 +71,11 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		//initialize population
 		//evaluateFitness(population)
 		//while(hasConverged()){
-		//	createOffspring()
+		//	serialize population
+		//	selectOffspring()
 		//	crossoverOffspring() -- uniform crossover
 		//	mutateOffspring() -----	done 
+		//	unserialize population
 		//	evaluateFitness(offspring)
 		//	replacePop(offspring, offspring.fitness)
 		//}
