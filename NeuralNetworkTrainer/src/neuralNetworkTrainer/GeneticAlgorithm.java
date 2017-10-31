@@ -29,7 +29,7 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		return null;
 	}
 	
-	public ArrayList<ArrayList<ArrayList<Double>>> crossoverOffspring(ArrayList<ArrayList<ArrayList<Double>>> offspring){
+	public ArrayList<ArrayList<ArrayList<Double>>> crossoverOffspring(ArrayList<ArrayList<ArrayList<Double>>> parents){
 		//TODO
 		return null;
 	}
