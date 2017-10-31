@@ -53,10 +53,13 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		return offspring;
 	}
 
-	public Double evaluateFitness(ArrayList<Network> population){
+	public ArrayList<Network> evaluateFitness(ArrayList<Network> population){
 		//TODO
+		//evaluate fitness for all memebers of the population
 		//calc fitness
 		
+		//sorts population based on fitness
+		Collections.sort(population);
 		return null;
 	}
 

@@ -1,6 +1,7 @@
 package neuralNetworkTrainer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class EvolutionStrategy extends TrainingAlgorithm {
 
@@ -41,8 +42,13 @@ public class EvolutionStrategy extends TrainingAlgorithm {
 		return null;
 	}
 
-	public Double evaluateFitness(Network network){
+	public ArrayList<Network> evaluateFitness(ArrayList<Network> population){
 		//TODO
+		//evaluate fitness for all memebers of the population
+		//calc fitness
+		
+		//sorts population based on fitness
+		Collections.sort(population);
 		return null;
 	}
 	
