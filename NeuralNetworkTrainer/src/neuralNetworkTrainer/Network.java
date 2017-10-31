@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * @author Elias
  *
  */
-class  Network {
+class  Network implements Comparable {
 
 	/**
 	 * The input layer
@@ -27,6 +27,11 @@ class  Network {
 	 * The output layer
 	 */
 	private Layer outputLayer;
+	
+	/**
+	 * The fitness of this network
+	 */
+	private double fitness;
 
 	/**
 	 * Constructs a network given a configuration
@@ -188,6 +193,19 @@ class  Network {
 			}
 			weightsIter++;
 		}
+	}
+	
+	public double getFitness() {
+		return this.fitness;
+	}	
+	
+	public void setFitness(double fitness) {
+		this.fitness = fitness;
+	}
+
+	@Override
+	public int compareTo(Object otherNetwork) {
+		return (int)(this.fitness - ((Network) otherNetwork).getFitness());
 	}
 }
 
