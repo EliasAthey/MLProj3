@@ -15,24 +15,28 @@ class Driver {
 	 * The training algorithm to use
 	 */
 	private static TrainingAlgorithm trainingAlgorithm;
-	
-//	these values will be passed to the training algorithm, not sure if we need to keep them here
-//	/**
-//	 * Backprop parameters
-//	 */
-//	private static Double learningRate;
-//	
-//	/**
-//	 * Gentic Algorithm parameters
-//	 */
-//	
-//	/**
-//	 * Evolution Strategy parameters
-//	 */
-//	
-//	/**
-//	 * Differential Evolution parameters
-//	 */
+
+	/**
+	 * True if the current problem is a classification problem; false if it is a linear regression problem
+	 */
+	public static Boolean isClassificationProblem;
+
+	/**
+	 * Backprop parameters
+	 */
+	public static Double learningRate;
+
+	/**
+	 * Gentic Algorithm parameters
+	 */
+
+	/**
+	 * Evolution Strategy parameters
+	 */
+
+	/**
+	 * Differential Evolution parameters
+	 */
 	
 	/**
 	 * The entry point of the application

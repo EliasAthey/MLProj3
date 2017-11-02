@@ -9,11 +9,6 @@ import java.util.ArrayList;
 class Backprop extends TrainingAlgorithm {
 
 	/**
-	 * The learning rate used for backprop
-	 */
-	private final Double learningRate;
-	
-	/**
 	 * The configuration fo the network
 	 */
 	private ArrayList<Integer> configuration;
@@ -32,10 +27,8 @@ class Backprop extends TrainingAlgorithm {
 	/**
 	 * Constructs a new backprop algorithm
 	 * @param configuration the number of nodes in each layer, first number is the number of input nodes
-	 * @param learningRate the learning rate used for backprop
 	 */
-	Backprop(ArrayList<Integer> configuration, Double learningRate, Double momentumValue) {
-		this.learningRate = learningRate;
+	Backprop(ArrayList<Integer> configuration, Double momentumValue) {
 		this.configuration = configuration;
 		this.momentumValue = momentumValue;
 	}
@@ -352,7 +345,7 @@ class Backprop extends TrainingAlgorithm {
 			for(Node hiddenNode : network.getHiddenLayers().get(layerIter).getNodes()){
 				for(int inputIter = 0; inputIter < hiddenNode.getInputs().size(); inputIter++){
 					Double weightChange = 0.0;
-					weightChange += ((1 - this.momentumValue) * this.learningRate * hiddenNode.getBackpropDelta() * hiddenNode.getInputs().get(inputIter));
+					weightChange += ((1 - this.momentumValue) * Driver.learningRate * hiddenNode.getBackpropDelta() * hiddenNode.getInputs().get(inputIter));
 					weightChange += (this.momentumValue * hiddenNode.getPrevWeightChange().get(inputIter));
 					Double originalWeight = hiddenNode.getWeights().get(inputIter);
 					hiddenNode.getWeights().remove(inputIter);
@@ -373,7 +366,7 @@ class Backprop extends TrainingAlgorithm {
 		for(Node outputNode : network.getOutputLayer().getNodes()){
 			for(int inputIter = 0; inputIter < outputNode.getInputs().size(); inputIter++){
 				Double weightChange = 0.0;
-				weightChange += ((1 - this.momentumValue) * this.learningRate * outputNode.getBackpropDelta() * outputNode.getInputs().get(inputIter));
+				weightChange += ((1 - this.momentumValue) * Driver.learningRate * outputNode.getBackpropDelta() * outputNode.getInputs().get(inputIter));
 				weightChange += (this.momentumValue * outputNode.getPrevWeightChange().get(inputIter));
 				Double originalWeight = outputNode.getWeights().get(inputIter);
 				outputNode.getWeights().remove(inputIter);
