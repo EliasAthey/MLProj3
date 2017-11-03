@@ -7,31 +7,6 @@ import java.util.ArrayList;
  *
  */
 class Backprop extends TrainingAlgorithm {
-
-	/**
-	 * The configuration fo the network
-	 */
-	private ArrayList<Integer> configuration;
-
-	/**
-	 * The value used for momentum when updating weights
-	 */
-	private final Double momentumValue;
-	
-//	needs to be a delta value for each node
-//	/**
-//	 * the delta values for each layer in the network
-//	 */
-//	private ArrayList<Double> deltaValues;
-	
-	/**
-	 * Constructs a new backprop algorithm
-	 * @param configuration the number of nodes in each layer, first number is the number of input nodes
-	 */
-	Backprop(ArrayList<Integer> configuration, Double momentumValue) {
-		this.configuration = configuration;
-		this.momentumValue = momentumValue;
-	}
 	
 	/**
 	 * Initializes a network with weights
@@ -40,12 +15,12 @@ class Backprop extends TrainingAlgorithm {
 	private Network initializeNetwork(){
 		
 		// construct network
-		Network network = new Network(this.configuration);
+		Network network = new Network(Driver.configuration);
 
 		// set input weights to 1.0, hidden and output weights between -0.5 and +0.5, prevWeightChange to 0.
 		ArrayList<ArrayList<Double>> weights = new ArrayList<>();
 		ArrayList<ArrayList<Double>> weightChange = new ArrayList<>();
-		for(int inputIter = 0; inputIter < this.configuration.get(0); inputIter++){
+		for(int inputIter = 0; inputIter < Driver.configuration.get(0); inputIter++){
 			ArrayList<Double> weightVector = new ArrayList<>();
 			ArrayList<Double> weightChangeVector = new ArrayList<>();
 			weightVector.add(0, 1.0);
@@ -53,11 +28,11 @@ class Backprop extends TrainingAlgorithm {
 			weights.add(weightVector);
 			weightChange.add(weightChangeVector);
 		}
-		for(int hiddenLayerIter = 1; hiddenLayerIter < this.configuration.size() - 1; hiddenLayerIter++){
-			for(int hiddenNodeIter = 0; hiddenNodeIter < this.configuration.get(hiddenLayerIter); hiddenNodeIter++){
+		for(int hiddenLayerIter = 1; hiddenLayerIter < Driver.configuration.size() - 1; hiddenLayerIter++){
+			for(int hiddenNodeIter = 0; hiddenNodeIter < Driver.configuration.get(hiddenLayerIter); hiddenNodeIter++){
 				ArrayList<Double> weightVector = new ArrayList<>();
 				ArrayList<Double> weightChangeVector = new ArrayList<>();
-				for(int weightIter = 0; weightIter < this.configuration.get(hiddenLayerIter - 1); weightIter++){
+				for(int weightIter = 0; weightIter < Driver.configuration.get(hiddenLayerIter - 1); weightIter++){
 					weightVector.add(weightIter, Math.pow(-1, (int)(Math.random() * 2)) * Math.random() * 0.5);
 					weightChangeVector.add(0, 0.0);
 				}
@@ -65,10 +40,10 @@ class Backprop extends TrainingAlgorithm {
 				weightChange.add(weightChangeVector);
 			}
 		}
-		for(int outputIter = 0; outputIter < this.configuration.get(this.configuration.size() - 1); outputIter++){
+		for(int outputIter = 0; outputIter < Driver.configuration.get(Driver.configuration.size() - 1); outputIter++){
 			ArrayList<Double> weightVector = new ArrayList<>();
 			ArrayList<Double> weightChangeVector = new ArrayList<>();
-			for(int weightIter = 0; weightIter < this.configuration.get(this.configuration.size() - 2); weightIter++){
+			for(int weightIter = 0; weightIter < Driver.configuration.get(Driver.configuration.size() - 2); weightIter++){
 				weightVector.add(weightIter, Math.pow(-1, (int)(Math.random() * 2)) * Math.random() * 0.5);
 				weightChangeVector.add(0, 0.0);
 			}
@@ -345,8 +320,8 @@ class Backprop extends TrainingAlgorithm {
 			for(Node hiddenNode : network.getHiddenLayers().get(layerIter).getNodes()){
 				for(int inputIter = 0; inputIter < hiddenNode.getInputs().size(); inputIter++){
 					Double weightChange = 0.0;
-					weightChange += ((1 - this.momentumValue) * Driver.learningRate * hiddenNode.getBackpropDelta() * hiddenNode.getInputs().get(inputIter));
-					weightChange += (this.momentumValue * hiddenNode.getPrevWeightChange().get(inputIter));
+					weightChange += ((1 - Driver.momentum) * Driver.learningRate * hiddenNode.getBackpropDelta() * hiddenNode.getInputs().get(inputIter));
+					weightChange += (Driver.momentum * hiddenNode.getPrevWeightChange().get(inputIter));
 					Double originalWeight = hiddenNode.getWeights().get(inputIter);
 					hiddenNode.getWeights().remove(inputIter);
 					hiddenNode.getWeights().add(inputIter, originalWeight + weightChange);
@@ -366,8 +341,8 @@ class Backprop extends TrainingAlgorithm {
 		for(Node outputNode : network.getOutputLayer().getNodes()){
 			for(int inputIter = 0; inputIter < outputNode.getInputs().size(); inputIter++){
 				Double weightChange = 0.0;
-				weightChange += ((1 - this.momentumValue) * Driver.learningRate * outputNode.getBackpropDelta() * outputNode.getInputs().get(inputIter));
-				weightChange += (this.momentumValue * outputNode.getPrevWeightChange().get(inputIter));
+				weightChange += ((1 - Driver.momentum) * Driver.learningRate * outputNode.getBackpropDelta() * outputNode.getInputs().get(inputIter));
+				weightChange += (Driver.momentum * outputNode.getPrevWeightChange().get(inputIter));
 				Double originalWeight = outputNode.getWeights().get(inputIter);
 				outputNode.getWeights().remove(inputIter);
 				outputNode.getWeights().add(inputIter, originalWeight + weightChange);

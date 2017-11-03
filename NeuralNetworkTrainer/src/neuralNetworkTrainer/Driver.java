@@ -17,6 +17,11 @@ class Driver {
 	private static TrainingAlgorithm trainingAlgorithm;
 
 	/**
+	 * The configuration of the network
+	 */
+	public static ArrayList<Integer> configuration;
+
+	/**
 	 * True if the current problem is a classification problem; false if it is a linear regression problem
 	 */
 	public static Boolean isClassificationProblem;
@@ -25,6 +30,7 @@ class Driver {
 	 * Backprop parameters
 	 */
 	public static Double learningRate;
+	public static Double momentum;
 
 	/**
 	 * Gentic Algorithm parameters
@@ -54,13 +60,13 @@ class Driver {
 		
 		
 		// test backprop
-		ArrayList<Integer> config = new ArrayList<Integer>();
-		config.add(0, 2);// inputs
-		config.add(1, 20);// first hidden layer
-		config.add(2, 1);// output
+		Driver.configuration = new ArrayList<>();
+		Driver.configuration.add(0, 2);// inputs
+		Driver.configuration.add(1, 20);// first hidden layer
+		Driver.configuration.add(2, 1);// output
 		Driver.learningRate = 0.04;
-		Double momentum = 0.4;
-		Driver.trainingAlgorithm = new Backprop(config, momentum);
+		Driver.momentum = 0.4;
+		Driver.trainingAlgorithm = new Backprop();
 		Driver.train();
 	}
 	
