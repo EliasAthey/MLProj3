@@ -24,25 +24,22 @@ class Driver {
 	/**
 	 * True if the current problem is a classification problem; false if it is a linear regression problem
 	 */
-	public static Boolean isClassificationProblem;
+	public static boolean isClassificationProblem;
 
 	/**
 	 * Backprop parameters
 	 */
-	public static Double learningRate;
-	public static Double momentum;
+	public static double learningRate;
+	public static double momentum;
 
 	/**
-	 * Gentic Algorithm parameters
+	 * Evolutionary algorithm parameters
 	 */
+	public static int populationSize;  // "mu"
+	public static int numberOffspring; // "lambda"
+	public static double mutationRate; // used by GA and ES
+	public static double beta;         // used by DE
 
-	/**
-	 * Evolution Strategy parameters
-	 */
-
-	/**
-	 * Differential Evolution parameters
-	 */
 	
 	/**
 	 * The entry point of the application
@@ -57,7 +54,9 @@ class Driver {
 		 * (-a argA -b argB -c -d argD)
 		 */
 		
-		
+		for(String x : args){
+			System.out.println(x);
+		}
 		
 		// test backprop
 		Driver.configuration = new ArrayList<>();
