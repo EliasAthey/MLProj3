@@ -4,6 +4,7 @@
 package neuralNetworkTrainer;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
@@ -14,6 +15,11 @@ import java.util.regex.Pattern;
 class Driver {
 
 	/**
+	 * The file for the data set
+	 */
+	private static File dataFile;
+
+	/**
 	 * The training algorithm to use
 	 */
 	private static TrainingAlgorithm trainingAlgorithm;
@@ -21,7 +27,7 @@ class Driver {
 	/**
 	 * The configuration of the network
 	 */
-	public static ArrayList<Integer> configuration;
+	public static ArrayList<Integer> configuration = new ArrayList<>();
 
 	/**
 	 * True if the current problem is a classification problem; false if it is a linear regression problem
@@ -58,24 +64,24 @@ class Driver {
 		 * args[0] is first param, NOT script name
 		 */
 
-
-		/**
-		 * Regex patterns used
-		 */
-		Pattern dashPattern = Pattern.compile("\\A-\\w");
-
-		/**
-		 * The dataset to learn
-		 */
-		File dataFile;
-
 		
 		if(args.length < 3){
-			// display help text and what parameters there are
+			Driver.displayHelpText();
+			return;
 		}
 		else{
-			dataFile = new File(args[0]);
-			for(int argIter = 1; argIter < args.length; argIter++){
+			// set required variables, return if they are not correct
+			if(!Driver.setDataFile(args[0])
+				|| !Driver.setTrainingAlgorithm(args[1])
+				|| !configureNetwork(args[2]))
+			{
+				Driver.displayHelpText();
+				return;
+			}
+
+			// check for any additional parameters, set accordingly
+			Pattern dashPattern = Pattern.compile("\\A-\\w");
+			for(int argIter = 3; argIter < args.length; argIter++){
 				if(dashPattern.matcher(args[argIter]).matches()){
 					switch(args[argIter].substring(1)){
 						case "a":
@@ -101,14 +107,14 @@ class Driver {
 		}
 		
 		// test backprop
-		Driver.configuration = new ArrayList<>();
-		Driver.configuration.add(0, 2);// inputs
-		Driver.configuration.add(1, 20);// first hidden layer
-		Driver.configuration.add(2, 1);// output
-		Driver.learningRate = 0.04;
-		Driver.momentum = 0.4;
-		Driver.trainingAlgorithm = new Backprop();
-		Driver.train();
+//		Driver.configuration = new ArrayList<>();
+//		Driver.configuration.add(0, 2);// inputs
+//		Driver.configuration.add(1, 20);// first hidden layer
+//		Driver.configuration.add(2, 1);// output
+//		Driver.learningRate = 0.04;
+//		Driver.momentum = 0.4;
+//		Driver.trainingAlgorithm = new Backprop();
+//		Driver.train();
 	}
 	
 	/**
@@ -120,4 +126,70 @@ class Driver {
 		return Driver.trainingAlgorithm.train();
 	}
 
+	/**
+	 * Sets the data file to learn from
+	 * @param input the file path
+	 * @return true if the operation is successful, false otherwise
+	 */
+	private static boolean setDataFile(String input){
+		Driver.dataFile = new File(input);
+		if(!dataFile.exists()){
+			System.out.println("The file does not exist, try again.\n");
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Sets the training algorithm based on a string
+	 * @param input the training algorithm
+	 * @return true if successful, false otherwise
+	 */
+	private static boolean setTrainingAlgorithm(String input){
+		boolean flag = true;
+		switch(input){
+			case "-bp":
+				Driver.trainingAlgorithm = new Backprop();
+				break;
+			case "-ga":
+				//Driver.trainingAlgorithm = new GA();
+				break;
+			case "-es":
+				//Driver.trainingAlgorithm = new ES();
+				break;
+			case "-de":
+				//Driver.trainingAlgorithm = new DE();
+				break;
+			default:
+				System.out.println("The training algorithm is wrong, try again.\n");
+				flag = false;
+		}
+		return flag;
+	}
+
+	/**
+	 * Splits the input string into an ArrayList of Integers and passes it to the Network constructor
+	 * @param input the network configuration
+	 * @return true if successful, false otherwise
+	 */
+	private static boolean configureNetwork(String input){
+		if(Pattern.matches("\\d+-\\d+(-\\d+)*", input)){
+			String[] layers = input.split("-");
+			for(String layerSize : layers){
+				Driver.configuration.add(Integer.parseInt(layerSize));
+			}
+			return true;
+		}
+		else{
+			System.out.println("The network configuration is wrong, try again.\n");
+			return false;
+		}
+	}
+
+	/**
+	 * Displays the help text for the program, specifically how to input parameters
+	 */
+	private static void displayHelpText(){
+		System.out.println("HELP!\n");
+	}
 }
