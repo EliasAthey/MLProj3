@@ -52,11 +52,11 @@ class Driver {
 		 * 
 		 * parse by dash notation to set specified parameters
 		 * (-a argA -b argB -c -d argD)
+		 *
+		 * args[0] is first param, NOT script name
 		 */
 		
-		for(String x : args){
-			System.out.println(x);
-		}
+		
 		
 		// test backprop
 		Driver.configuration = new ArrayList<>();
