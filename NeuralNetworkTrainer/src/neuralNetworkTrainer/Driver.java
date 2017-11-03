@@ -4,7 +4,6 @@
 package neuralNetworkTrainer;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
@@ -32,7 +31,7 @@ class Driver {
 	/**
 	 * True if the current problem is a classification problem; false if it is a linear regression problem
 	 */
-	public static boolean isClassificationProblem;
+	public static boolean isClassificationNetwork;
 
 	/**
 	 * Backprop parameters
@@ -51,7 +50,9 @@ class Driver {
 	
 	/**
 	 * The entry point of the application
-	 * @param args The network training algorithm and specified parameters
+	 * @param args args[0] is the datafile
+	 *             args[1] is -bp/-ga/-es/-de specifying the training algorithm
+	 *             args[2] is the configuration of the network(ie 1-2-3)
 	 */
 	public static void main(String[] args) {
 		
@@ -60,8 +61,6 @@ class Driver {
 		 * 
 		 * parse by dash notation to set specified parameters
 		 * (-a argA -b argB -c -d argD)
-		 *
-		 * args[0] is first param, NOT script name
 		 */
 
 		
@@ -84,23 +83,73 @@ class Driver {
 			for(int argIter = 3; argIter < args.length; argIter++){
 				if(dashPattern.matcher(args[argIter]).matches()){
 					switch(args[argIter].substring(1)){
-						case "a":
+						// is classification network?
+						case "c":
+							Driver.isClassificationNetwork = true;
+							break;
+						// learning rate
+						case "lr":
 							if(argIter + 1 < args.length && !dashPattern.matcher(args[argIter + 1]).matches()){
-								System.out.println("-a has the argument: " + args[++argIter]);
+								//System.out.println("-a has the argument: " + args[++argIter]);
 							}
 							else{
-								System.out.println("-a must be followed by a valid argument");
+								//System.out.println("-a must be followed by a valid argument");
 							}
 							break;
+						// momentum
+						case "m":
+							if(argIter + 1 < args.length && !dashPattern.matcher(args[argIter + 1]).matches()){
+								//System.out.println("-b has the argument: " + args[++argIter]);
+							}
+							else{
+								//System.out.println("-b must be followed by a valid argument");
+							}
+							break;
+						// size of population
+						case "p":
+							if(argIter + 1 < args.length && !dashPattern.matcher(args[argIter + 1]).matches()){
+								//System.out.println("-b has the argument: " + args[++argIter]);
+							}
+							else{
+								//System.out.println("-b must be followed by a valid argument");
+							}
+							break;
+						// number of offspring generated each iteration
+						case "o":
+							if(argIter + 1 < args.length && !dashPattern.matcher(args[argIter + 1]).matches()){
+								//System.out.println("-b has the argument: " + args[++argIter]);
+							}
+							else{
+								//System.out.println("-b must be followed by a valid argument");
+							}
+							break;
+						// mutation rate
+						case "mr":
+							if(argIter + 1 < args.length && !dashPattern.matcher(args[argIter + 1]).matches()){
+								//System.out.println("-b has the argument: " + args[++argIter]);
+							}
+							else{
+								//System.out.println("-b must be followed by a valid argument");
+							}
+							break;
+						// DE beta parameter
 						case "b":
 							if(argIter + 1 < args.length && !dashPattern.matcher(args[argIter + 1]).matches()){
-								System.out.println("-b has the argument: " + args[++argIter]);
+								//System.out.println("-b has the argument: " + args[++argIter]);
 							}
 							else{
-								System.out.println("-b must be followed by a valid argument");
+								//System.out.println("-b must be followed by a valid argument");
 							}
 							break;
-						default: //System.out.println(args[++argIter]);
+						// set default values
+						default:
+							Driver.isClassificationNetwork = false;
+							Driver.learningRate = 0.01;
+							Driver.momentum = 0.5;
+							Driver.populationSize = 32;
+							Driver.numberOffspring = 50;
+							Driver.mutationRate = 0.01;
+							Driver.beta = 0.1;
 					}
 				}
 			}
