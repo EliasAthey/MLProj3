@@ -18,20 +18,62 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 			
 			//adding a global config in driver might be worth doing
 			//or passing config through train() to all these methods
-			Network individual = new Network(Driver.configuration);
+			Network individual = new Network(Driver.configuration); //do we need to randomize the weights????
 			population.add(individual);
 		}
 		return population;
 	}
 	
-	public ArrayList<Network> selectOffspring(ArrayList<Network> population){
+	public ArrayList<Network> selectParents(ArrayList<Network> population){
 		//TODO
+		//using rank
+		//make parent pairs
+		//
 		return null;
 	}
 	
-	public ArrayList<ArrayList<ArrayList<Double>>> crossoverOffspring(ArrayList<ArrayList<ArrayList<Double>>> parents){
+	public ArrayList<ArrayList<ArrayList<Double>>> crossoverOffspring(ArrayList<ArrayList<Double>> parent1, ArrayList<ArrayList<Double>> parent2){
 		//TODO
-		return null;
+		//make random arraylist of boolean arraylists that is the same size of the parents
+		ArrayList<ArrayList<Boolean>> randomizer = new ArrayList<ArrayList<Boolean>>();
+		
+		for(int outerIter = 0; outerIter < parent1.size(); outerIter++) {
+			
+			ArrayList<Boolean> randChrom = new ArrayList<Boolean>();
+			
+			for(int innerIter = 0; innerIter < parent1.get(0).size(); innerIter++) {
+				randChrom.add(Driver.randNum.nextBoolean());
+			}
+			
+			randomizer.add(randChrom);
+		}
+		
+		//make offspring 
+		ArrayList<ArrayList<Double>> offspring1 = new ArrayList<ArrayList<Double>>();
+		ArrayList<ArrayList<Double>> offspring2 = new ArrayList<ArrayList<Double>>();
+		
+		//randomizer selects which offspring gets which gene
+		for(int outerIter = 0; outerIter < parent1.size(); outerIter++) {
+			offspring1.add(new ArrayList<Double>());
+			offspring2.add(new ArrayList<Double>());
+			
+			for(int innerIter = 0; innerIter < parent1.get(0).size(); innerIter++) {
+				
+				if (randomizer.get(outerIter).get(innerIter)) {
+					offspring1.get(outerIter).add(parent1.get(outerIter).get(innerIter));
+					offspring2.get(outerIter).add(parent2.get(outerIter).get(innerIter));
+				}
+				
+				else {//flip which offspring get which gene
+					offspring2.get(outerIter).add(parent1.get(outerIter).get(innerIter));
+					offspring2.get(outerIter).add(parent2.get(outerIter).get(innerIter));
+				}
+			}
+		}
+		ArrayList<ArrayList<ArrayList<Double>>> offspringPair = new ArrayList<ArrayList<ArrayList<Double>>>();
+		offspringPair.add(offspring2);
+		offspringPair.add(offspring1);
+		return offspringPair;
 	}
 
 	public ArrayList<ArrayList<ArrayList<Double>>> mutateOffspring(ArrayList<ArrayList<ArrayList<Double>>> offspring){
@@ -53,10 +95,24 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		return offspring;
 	}
 
-	public ArrayList<Network> evaluateFitness(ArrayList<Network> population){
-		//TODO
-		//evaluate fitness for all memebers of the population
-		//calc fitness
+	//classification
+	//TODO:
+	//need to be able to run a single data point through the network in Network.evaluate(datapoint) method
+	//need a set of evaluation data
+	public ArrayList<Network> evalClasificationFitness(ArrayList<Network> population){
+		//evalutaion set of data == eval
+		ArrayList<ArrayList<Double>> eval = new ArrayList<ArrayList<Double>>();
+		
+		for(Network individual: population) {
+			double fitness;
+			for(Object datapoint: eval) {
+				if(individual.evaluate(eval)) { //returns true or false for classification
+					fitness++;
+				}
+			}
+			
+			fitness = fitness/eval.size();
+		}
 		
 		//sorts population based on fitness
 		Collections.sort(population);
