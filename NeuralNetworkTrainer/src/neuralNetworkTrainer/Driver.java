@@ -26,26 +26,26 @@ class Driver {
 	/**
 	 * The configuration of the network
 	 */
-	public static ArrayList<Integer> configuration = new ArrayList<>();
+	static ArrayList<Integer> configuration = new ArrayList<>();
 
 	/**
 	 * True if the current problem is a classification problem; false if it is a linear regression problem
 	 */
-	public static boolean isClassificationNetwork;
+	static boolean isClassificationNetwork;
 
 	/**
 	 * Backprop parameters
 	 */
-	public static double learningRate;
-	public static double momentum;
+	static double learningRate;
+	static double momentum;
 
 	/**
 	 * Evolutionary algorithm parameters
 	 */
-	public static int populationSize;  // "mu"
-	public static int numberOffspring; // "lambda"
-	public static double mutationRate; // used by GA and ES
-	public static double beta;         // used by DE
+	static int populationSize;  // "mu"
+	static int numberOffspring; // "lambda"
+	static double mutationRate; // used by GA and ES
+	static double beta;         // used by DE
 
 	
 	/**
@@ -55,7 +55,12 @@ class Driver {
 	 *             args[2] is the configuration of the network(ie 1-2-3)
 	 */
 	public static void main(String[] args) {
-		
+
+		for (String x :
+				args) {
+			System.out.println(x);
+		}
+
 		/**
 		 * TODO
 		 * 
@@ -66,7 +71,7 @@ class Driver {
 		
 		if(args.length < 3){
 			Driver.displayHelpText();
-			return;
+			System.exit(0);
 		}
 		else{
 			// set required variables, return if they are not correct
@@ -75,86 +80,102 @@ class Driver {
 				|| !configureNetwork(args[2]))
 			{
 				Driver.displayHelpText();
-				return;
+				System.exit(0);
 			}
 
-			// check for any additional parameters, set accordingly
-			Pattern dashPattern = Pattern.compile("\\A-\\w");
+			// set default values for all optional parameters
+			Driver.isClassificationNetwork = false;
+			Driver.learningRate = 0.01;
+			Driver.momentum = 0.5;
+			Driver.populationSize = 32;
+			Driver.numberOffspring = 50;
+			Driver.mutationRate = 0.01;
+			Driver.beta = 0.1;
+
+			// check for any additional options (parameters), set accordingly
+			Pattern dashPattern = Pattern.compile("\\A-\\w+");
 			for(int argIter = 3; argIter < args.length; argIter++){
 				if(dashPattern.matcher(args[argIter]).matches()){
-					switch(args[argIter].substring(1)){
+					switch(args[argIter]){
 						// is classification network?
-						case "c":
+						case "-c":
 							Driver.isClassificationNetwork = true;
 							break;
 						// learning rate
-						case "lr":
-							if(argIter + 1 < args.length && !dashPattern.matcher(args[argIter + 1]).matches()){
-								//System.out.println("-a has the argument: " + args[++argIter]);
+						case "-lr":
+							if(argIter + 1 < args.length && Pattern.matches("\\d+\\.\\d+", args[argIter + 1])){
+								System.out.println("Learning rate: " + args[argIter + 1]);
+								Driver.learningRate = Float.parseFloat(args[++argIter]);
 							}
 							else{
-								//System.out.println("-a must be followed by a valid argument");
+								System.out.println("-lr must be followed by a float value for the Backprop learning rate\n");
+								System.exit(0);
 							}
 							break;
 						// momentum
-						case "m":
-							if(argIter + 1 < args.length && !dashPattern.matcher(args[argIter + 1]).matches()){
-								//System.out.println("-b has the argument: " + args[++argIter]);
+						case "-m":
+							if(argIter + 1 < args.length && Pattern.matches("\\d+\\.\\d+", args[argIter + 1])){
+								System.out.println("Momentum: " + args[argIter + 1]);
+								Driver.momentum = Float.parseFloat(args[++argIter]);
 							}
 							else{
-								//System.out.println("-b must be followed by a valid argument");
+								System.out.println("-m must be followed by a float value for the Backprop momentum\n");
+								System.exit(0);
 							}
 							break;
 						// size of population
-						case "p":
-							if(argIter + 1 < args.length && !dashPattern.matcher(args[argIter + 1]).matches()){
-								//System.out.println("-b has the argument: " + args[++argIter]);
+						case "-p":
+							if(argIter + 1 < args.length && Pattern.matches("\\d+", args[argIter + 1])){
+								System.out.println("Population size: " + args[argIter + 1]);
+								Driver.populationSize = Integer.parseInt(args[++argIter]);
 							}
 							else{
-								//System.out.println("-b must be followed by a valid argument");
+								System.out.println("-p must be followed by an integer for the population size\n");
+								System.exit(0);
 							}
 							break;
 						// number of offspring generated each iteration
-						case "o":
-							if(argIter + 1 < args.length && !dashPattern.matcher(args[argIter + 1]).matches()){
-								//System.out.println("-b has the argument: " + args[++argIter]);
+						case "-o":
+							if(argIter + 1 < args.length && Pattern.matches("\\d+", args[argIter + 1])){
+								System.out.println("Offspring size: " + args[argIter + 1]);
+								Driver.numberOffspring = Integer.parseInt(args[++argIter]);
 							}
 							else{
-								//System.out.println("-b must be followed by a valid argument");
+								System.out.println("-o must be followed by an integer for the number of offspring generated each generation\n");
+								System.exit(0);
 							}
 							break;
 						// mutation rate
-						case "mr":
-							if(argIter + 1 < args.length && !dashPattern.matcher(args[argIter + 1]).matches()){
-								//System.out.println("-b has the argument: " + args[++argIter]);
+						case "-mr":
+							if(argIter + 1 < args.length && Pattern.matches("\\d+\\.\\d+", args[argIter + 1])){
+								System.out.println("Mutation rate: " + args[argIter + 1]);
+								Driver.mutationRate = Float.parseFloat(args[++argIter]);
 							}
 							else{
-								//System.out.println("-b must be followed by a valid argument");
+								System.out.println("-mr must be followed by a float value for the mutation rate\n");
+								System.exit(0);
 							}
 							break;
 						// DE beta parameter
-						case "b":
-							if(argIter + 1 < args.length && !dashPattern.matcher(args[argIter + 1]).matches()){
-								//System.out.println("-b has the argument: " + args[++argIter]);
+						case "-b":
+							if(argIter + 1 < args.length && Pattern.matches("\\d+\\.\\d+", args[argIter + 1])){
+								System.out.println("Beta: " + args[argIter + 1]);
+								Driver.beta = Float.parseFloat(args[++argIter]);
 							}
 							else{
-								//System.out.println("-b must be followed by a valid argument");
+								System.out.println("-b must be followed by a float value for the Differential Evolution beta value\n");
+								System.exit(0);
 							}
 							break;
-						// set default values
+						// wrong option
 						default:
-							Driver.isClassificationNetwork = false;
-							Driver.learningRate = 0.01;
-							Driver.momentum = 0.5;
-							Driver.populationSize = 32;
-							Driver.numberOffspring = 50;
-							Driver.mutationRate = 0.01;
-							Driver.beta = 0.1;
+							System.out.println(args[argIter] + " is not a valid option\n");
+							System.exit(0);
 					}
 				}
 			}
 		}
-		
+		System.out.println("Success\n");
 		// test backprop
 //		Driver.configuration = new ArrayList<>();
 //		Driver.configuration.add(0, 2);// inputs
