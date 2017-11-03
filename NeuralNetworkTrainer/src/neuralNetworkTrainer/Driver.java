@@ -56,25 +56,19 @@ class Driver {
 	 */
 	public static void main(String[] args) {
 
+		// testing
 		for (String x :
 				args) {
 			System.out.println(x);
 		}
 
-		/**
-		 * TODO
-		 * 
-		 * parse by dash notation to set specified parameters
-		 * (-a argA -b argB -c -d argD)
-		 */
-
-		
+		// Check for three required parameters
 		if(args.length < 3){
 			Driver.displayHelpText();
 			System.exit(0);
 		}
 		else{
-			// set required variables, return if they are not correct
+			// set required parameters, exit if they are not correct
 			if(!Driver.setDataFile(args[0])
 				|| !Driver.setTrainingAlgorithm(args[1])
 				|| !configureNetwork(args[2]))
@@ -130,7 +124,7 @@ class Driver {
 								Driver.populationSize = Integer.parseInt(args[++argIter]);
 							}
 							else{
-								System.out.println("-p must be followed by an integer for the population size\n");
+								System.out.println("-p must be followed by a positive integer for the population size\n");
 								System.exit(0);
 							}
 							break;
@@ -141,7 +135,7 @@ class Driver {
 								Driver.numberOffspring = Integer.parseInt(args[++argIter]);
 							}
 							else{
-								System.out.println("-o must be followed by an integer for the number of offspring generated each generation\n");
+								System.out.println("-o must be followed by a positive integer for the number of offspring generated each generation\n");
 								System.exit(0);
 							}
 							break;
@@ -176,6 +170,8 @@ class Driver {
 			}
 		}
 		System.out.println("Success\n");
+
+		
 		// test backprop
 //		Driver.configuration = new ArrayList<>();
 //		Driver.configuration.add(0, 2);// inputs
