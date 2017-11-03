@@ -3,7 +3,9 @@
  */
 package neuralNetworkTrainer;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 /**
  * @author Elias
@@ -55,8 +57,48 @@ class Driver {
 		 *
 		 * args[0] is first param, NOT script name
 		 */
+
+
+		/**
+		 * Regex patterns used
+		 */
+		Pattern dashPattern = Pattern.compile("\\A-\\w");
+
+		/**
+		 * The dataset to learn
+		 */
+		File dataFile;
+
 		
-		
+		if(args.length < 3){
+			// display help text and what parameters there are
+		}
+		else{
+			dataFile = new File(args[0]);
+			for(int argIter = 1; argIter < args.length; argIter++){
+				if(dashPattern.matcher(args[argIter]).matches()){
+					switch(args[argIter].substring(1)){
+						case "a":
+							if(argIter + 1 < args.length && !dashPattern.matcher(args[argIter + 1]).matches()){
+								System.out.println("-a has the argument: " + args[++argIter]);
+							}
+							else{
+								System.out.println("-a must be followed by a valid argument");
+							}
+							break;
+						case "b":
+							if(argIter + 1 < args.length && !dashPattern.matcher(args[argIter + 1]).matches()){
+								System.out.println("-b has the argument: " + args[++argIter]);
+							}
+							else{
+								System.out.println("-b must be followed by a valid argument");
+							}
+							break;
+						default: //System.out.println(args[++argIter]);
+					}
+				}
+			}
+		}
 		
 		// test backprop
 		Driver.configuration = new ArrayList<>();
