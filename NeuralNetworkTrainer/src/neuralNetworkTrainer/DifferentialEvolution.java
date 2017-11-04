@@ -5,8 +5,6 @@ import java.util.Collections;
 
 public class DifferentialEvolution extends TrainingAlgorithm {
 
-	private int populationSize;
-
 	public ArrayList<Network> generatePopulation(){
 		
 		//if this is the same for GA ES and DE maybe we should move this functionality to TrainingAlgorithm
@@ -14,7 +12,7 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 		ArrayList<Network> population = null;
 				
 		//create populationSize number of individuals and add them to population
-		for(int popIter = 0;  popIter < populationSize; popIter++) {
+		for(int popIter = 0;  popIter < Driver.populationSize; popIter++) {
 			
 			//adding a global config in driver might be worth doing
 			//or passing config through train() to all these methods

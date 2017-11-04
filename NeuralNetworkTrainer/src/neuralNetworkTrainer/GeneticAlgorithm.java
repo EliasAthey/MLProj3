@@ -2,11 +2,8 @@ package neuralNetworkTrainer;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Random;
 
 public class GeneticAlgorithm extends TrainingAlgorithm {
-
-	private int populationSize;
 
 	public ArrayList<Network> generatePopulation(){
 		//if this is the same for GA ES and DE  maybe we should move this functionality to TrainingAlgorithm
@@ -14,7 +11,7 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		ArrayList<Network> population = null;
 		
 		//create populationSize number of individuals and add them to population
-		for(int popIter = 0;  popIter < populationSize; popIter++) {
+		for(int popIter = 0;  popIter < Driver.populationSize; popIter++) {
 			
 			//adding a global config in driver might be worth doing
 			//or passing config through train() to all these methods
@@ -77,13 +74,11 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 	}
 
 	public ArrayList<ArrayList<ArrayList<Double>>> mutateOffspring(ArrayList<ArrayList<ArrayList<Double>>> offspring){
-		double pm = .05; //mutation rate. probly store this in driver or something
-
 		for (ArrayList<ArrayList<Double>> individual : offspring) {
 
 			for (ArrayList<Double> chromosome : individual) {
 				for(Double gene : chromosome) {
-					if (Math.random() <= pm) { //gives a pm% chance of a mutation happening on any given gene, lower for higher fitness individuals maybe???? 
+					if (Math.random() <= Driver.mutationRate) { //gives a mustationRate % chance of a mutation happening on any given gene, lower for higher fitness individuals maybe????
 						//change gene with a random number from a gaussian distribution 
 						//centered at 0 with a standard deviation of 1
 						gene += Driver.randNum.nextGaussian();

@@ -68,10 +68,10 @@ class Backprop extends TrainingAlgorithm {
 		while(true){
 			
 			// holds the last computed output
-			ArrayList<Double> computedOutput = new ArrayList<>();
+			ArrayList<Double> computedOutput;
 			
 			// holds the last expected output
-			ArrayList<Double> expectedOutput = new ArrayList<>();
+			ArrayList<Double> expectedOutput;
 			
 			// all the serialized networks (weights) of a single run
 			ArrayList<ArrayList<ArrayList<Double>>> allWeights = new ArrayList<>();
