@@ -14,45 +14,8 @@ class Backprop extends TrainingAlgorithm {
 	 */
 	private Network initializeNetwork(){
 		
-		// construct network
-		Network network = new Network();
-
-		// set input weights to 1.0, hidden and output weights between -0.5 and +0.5, prevWeightChange to 0.
-		ArrayList<ArrayList<Double>> weights = new ArrayList<>();
-		ArrayList<ArrayList<Double>> weightChange = new ArrayList<>();
-		for(int inputIter = 0; inputIter < Driver.configuration.get(0); inputIter++){
-			ArrayList<Double> weightVector = new ArrayList<>();
-			ArrayList<Double> weightChangeVector = new ArrayList<>();
-			weightVector.add(0, 1.0);
-			weightChangeVector.add(0, 0.0);
-			weights.add(weightVector);
-			weightChange.add(weightChangeVector);
-		}
-		for(int hiddenLayerIter = 1; hiddenLayerIter < Driver.configuration.size() - 1; hiddenLayerIter++){
-			for(int hiddenNodeIter = 0; hiddenNodeIter < Driver.configuration.get(hiddenLayerIter); hiddenNodeIter++){
-				ArrayList<Double> weightVector = new ArrayList<>();
-				ArrayList<Double> weightChangeVector = new ArrayList<>();
-				for(int weightIter = 0; weightIter < Driver.configuration.get(hiddenLayerIter - 1); weightIter++){
-					weightVector.add(weightIter, Math.pow(-1, (int)(Math.random() * 2)) * Math.random() * 0.5);
-					weightChangeVector.add(0, 0.0);
-				}
-				weights.add(weightVector);
-				weightChange.add(weightChangeVector);
-			}
-		}
-		for(int outputIter = 0; outputIter < Driver.configuration.get(Driver.configuration.size() - 1); outputIter++){
-			ArrayList<Double> weightVector = new ArrayList<>();
-			ArrayList<Double> weightChangeVector = new ArrayList<>();
-			for(int weightIter = 0; weightIter < Driver.configuration.get(Driver.configuration.size() - 2); weightIter++){
-				weightVector.add(weightIter, Math.pow(-1, (int)(Math.random() * 2)) * Math.random() * 0.5);
-				weightChangeVector.add(0, 0.0);
-			}
-			weights.add(weightVector);
-			weightChange.add(weightChangeVector);
-		}
-		network.setWeights(weights, false);
-		network.setWeights(weightChange, true);
-		return network;
+		// construct network with random weights
+		return new Network(true);
 	}
 
 	/**
@@ -105,7 +68,7 @@ class Backprop extends TrainingAlgorithm {
 				squaredErrors.add(samplePointIter, this.getSquaredError(expectedOutput, computedOutput));
 				
 				// Save original weights
-				ArrayList<ArrayList<Double>> originalWeights = (ArrayList<ArrayList<Double>>)Network.serializeNetwork(network).clone();
+				ArrayList<ArrayList<Double>> originalWeights = (ArrayList<ArrayList<Double>>)Network.serializeNetwork(network, false).clone();
 				
 				// set delta values then update weights
 				this.setOutputDeltas(network, expectedOutput);
@@ -114,7 +77,7 @@ class Backprop extends TrainingAlgorithm {
 				this.updateHiddenNodeWeights(network);
 				
 				// Save updated weights
-				allWeights.add((ArrayList<ArrayList<Double>>)Network.serializeNetwork(network).clone());
+				allWeights.add((ArrayList<ArrayList<Double>>)Network.serializeNetwork(network, false).clone());
 				
 				// Reset to original weights
 				network.setWeights(originalWeights, false);
@@ -149,7 +112,7 @@ class Backprop extends TrainingAlgorithm {
 			
 			// check convergence
 			if(!this.hasConverged(network)){
-				ArrayList<ArrayList<Double>> originalWieghts = (ArrayList<ArrayList<Double>>)Network.serializeNetwork(network);
+				ArrayList<ArrayList<Double>> originalWieghts = (ArrayList<ArrayList<Double>>)Network.serializeNetwork(network, false);
 				network.setWeights(this.getChangeInWeights(averagedWeights, originalWieghts), true);
 				network.setWeights(averagedWeights, false);
 

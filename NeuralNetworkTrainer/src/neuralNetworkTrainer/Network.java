@@ -4,6 +4,7 @@
 package neuralNetworkTrainer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * The Network class is a container for a neural network.
@@ -36,10 +37,25 @@ class  Network {
 		this.inputLayer = new Layer();
 		this.hiddenLayers = new ArrayList<>();
 		this.outputLayer = new Layer();
+
+		ArrayList<ArrayList<Double>> weights = new ArrayList<>();
+		ArrayList<ArrayList<Double>> weightChange = new ArrayList<>();
+		int weightIndexCounter = Driver.configuration.stream().mapToInt(Integer :: intValue).sum() - 1;
 		
 		// create output layer, these nodes use linear function and have no downstream nodes
 		for(int nodeIter = 0; nodeIter < Driver.configuration.get(Driver.configuration.size() - 1); nodeIter++){
 			this.outputLayer.getNodes().add(nodeIter, new Node(new LinearFunction(), new ArrayList<Node>(), nodeIter));
+			if(setRandomWeights){
+				ArrayList<Double> weightVector = new ArrayList<>();
+				ArrayList<Double> weightChangeVector = new ArrayList<>();
+				for(int weightIter = 0; weightIter < Driver.configuration.get(Driver.configuration.size() - 2); weightIter++){
+					weightVector.add(weightIter, Math.pow(-1, (int)(Math.random() * 2)) * Math.random() * 0.5);
+					weightChangeVector.add(0, 0.0);
+				}
+				weights.add(weightVector);
+				weightChange.add(weightChangeVector);
+				weightIndexCounter--;
+			}
 		}
 		
 		// create hidden layers in reverse, starting at the second to last index of configuration
@@ -48,18 +64,49 @@ class  Network {
 			this.hiddenLayers.add(new Layer());
 		}
 		for(int layerIter = Driver.configuration.size() - 2; layerIter > 0; layerIter--){
-			
+
+			weightIndexCounter -= Driver.configuration.get(layerIter);
+
 			// create hidden nodes for this layer, these nodes use sigmoidal function
 			for(int nodeIter = 0; nodeIter < Driver.configuration.get(layerIter); nodeIter++){
 				this.hiddenLayers.get(layerIter - 1).getNodes().add(nodeIter, new Node(new SigmoidalFunction(), downstreamNodes, nodeIter));
+
+				// set hidden weights between -0.5 and +0.5
+				if(setRandomWeights){
+					ArrayList<Double> weightVector = new ArrayList<>();
+					ArrayList<Double> weightChangeVector = new ArrayList<>();
+					for(int weightIter = 0; weightIter < Driver.configuration.get(layerIter - 1); weightIter++){
+						weightVector.add(weightIter, Math.pow(-1, (int)(Math.random() * 2)) * Math.random() * 0.5);
+						weightChangeVector.add(0, 0.0);
+					}
+					weights.add(weightIndexCounter, weightVector);
+					weightChange.add(weightIndexCounter, weightChangeVector);
+					weightIndexCounter++;
+				}
 			}
 			downstreamNodes = this.hiddenLayers.get(layerIter - 1).getNodes();
+			weightIndexCounter -= Driver.configuration.get(layerIter);
 		}
 		
 		// create input layer, these node use sigmoidal function
 		for(int nodeIter = 0; nodeIter < Driver.configuration.get(0); nodeIter++){
-			this.inputLayer.getNodes().add(new Node(new SigmoidalFunction(), downstreamNodes, nodeIter));
+			this.inputLayer.getNodes().add(nodeIter, new Node(new SigmoidalFunction(), downstreamNodes, nodeIter));
+			weightIndexCounter -= Driver.configuration.get(0);
+
+			// set input weights to 1
+			if(setRandomWeights){
+				ArrayList<Double> weightVector = new ArrayList<>();
+				ArrayList<Double> weightChangeVector = new ArrayList<>();
+				weightVector.add(0, 1.0);
+				weightChangeVector.add(0, 0.0);
+				weights.add(weightIndexCounter, weightVector);
+				weightChange.add(weightIndexCounter, weightChangeVector);
+				weightIndexCounter++;
+			}
 		}
+
+		this.setWeights(weights, false);
+		this.setWeights(weightChange, true);
 	}
 	
 	/**
