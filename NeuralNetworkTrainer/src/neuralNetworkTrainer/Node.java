@@ -122,7 +122,7 @@ class Node {
 	
 	/**
 	 * Sets the backprop delta value of this node
-	 * @param delta Sthe backprop delta value to set for this node
+	 * @param delta the backprop delta value to set for this node
 	 */
 	void setBackpropDelta(Double delta){
 		this.backpropDelta = delta;

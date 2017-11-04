@@ -15,7 +15,7 @@ class Backprop extends TrainingAlgorithm {
 	private Network initializeNetwork(){
 		
 		// construct network
-		Network network = new Network(Driver.configuration);
+		Network network = new Network();
 
 		// set input weights to 1.0, hidden and output weights between -0.5 and +0.5, prevWeightChange to 0.
 		ArrayList<ArrayList<Double>> weights = new ArrayList<>();

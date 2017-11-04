@@ -29,37 +29,35 @@ class  Network {
 	private Layer outputLayer;
 
 	/**
-	 * Constructs a network given a configuration
-	 * 
-	 * @param configuration each number represents the number of nodes in the layer, first index is associated to the input layer, last index is the ouptut layer.
+	 * Constructs a network based off the configuration in the Driver
 	 */
-	Network(ArrayList<Integer> configuration){
+	Network(boolean setRandomWeights){
 		
 		this.inputLayer = new Layer();
-		this.hiddenLayers = new ArrayList<Layer>();
+		this.hiddenLayers = new ArrayList<>();
 		this.outputLayer = new Layer();
 		
 		// create output layer, these nodes use linear function and have no downstream nodes
-		for(int nodeIter = 0; nodeIter < configuration.get(configuration.size() - 1); nodeIter++){
+		for(int nodeIter = 0; nodeIter < Driver.configuration.get(Driver.configuration.size() - 1); nodeIter++){
 			this.outputLayer.getNodes().add(nodeIter, new Node(new LinearFunction(), new ArrayList<Node>(), nodeIter));
 		}
 		
-		// create hidden layers in reverse, starting at the second to last index of configuartion
+		// create hidden layers in reverse, starting at the second to last index of configuration
 		ArrayList<Node> downstreamNodes = this.outputLayer.getNodes();
-		for(int layerIter = configuration.size() - 2; layerIter > 0; layerIter--){
+		for(int layerIter = Driver.configuration.size() - 2; layerIter > 0; layerIter--){
 			this.hiddenLayers.add(new Layer());
 		}
-		for(int layerIter = configuration.size() - 2; layerIter > 0; layerIter--){
+		for(int layerIter = Driver.configuration.size() - 2; layerIter > 0; layerIter--){
 			
 			// create hidden nodes for this layer, these nodes use sigmoidal function
-			for(int nodeIter = 0; nodeIter < configuration.get(layerIter); nodeIter++){
+			for(int nodeIter = 0; nodeIter < Driver.configuration.get(layerIter); nodeIter++){
 				this.hiddenLayers.get(layerIter - 1).getNodes().add(nodeIter, new Node(new SigmoidalFunction(), downstreamNodes, nodeIter));
 			}
 			downstreamNodes = this.hiddenLayers.get(layerIter - 1).getNodes();
 		}
 		
 		// create input layer, these node use sigmoidal function
-		for(int nodeIter = 0; nodeIter < configuration.get(0); nodeIter++){
+		for(int nodeIter = 0; nodeIter < Driver.configuration.get(0); nodeIter++){
 			this.inputLayer.getNodes().add(new Node(new SigmoidalFunction(), downstreamNodes, nodeIter));
 		}
 	}
@@ -95,32 +93,46 @@ class  Network {
 	 * 		   The top-level list contains an entry for each node; index 0 is the first input node; the final index is the final output node.
 	 * 		   The sub-list contains weights for the top-level index Node (ie list.get(A) is the weights of node A).
 	 */
-	static ArrayList<ArrayList<Double>> serializeNetwork(Network network){
+	static ArrayList<ArrayList<Double>> serializeNetwork(Network network, boolean isWeightChange){
 		
 		ArrayList<ArrayList<Double>> weights = new ArrayList<ArrayList<Double>>();
 		for(Node node : network.inputLayer.getNodes()){
-			weights.add((ArrayList<Double>)node.getWeights().clone());
-		}
-		for(Layer hiddenLayer : network.getHiddenLayers()){
-			for(Node node : hiddenLayer.getNodes()){
+			if(isWeightChange){
+				weights.add((ArrayList<Double>)node.getPrevWeightChange().clone());
+			}
+			else{
 				weights.add((ArrayList<Double>)node.getWeights().clone());
 			}
 		}
+		for(Layer hiddenLayer : network.getHiddenLayers()){
+			for(Node node : hiddenLayer.getNodes()){
+				if(isWeightChange){
+					weights.add((ArrayList<Double>)node.getPrevWeightChange().clone());
+				}
+				else{
+					weights.add((ArrayList<Double>)node.getWeights().clone());
+				}
+			}
+		}
 		for(Node node : network.outputLayer.getNodes()){
-			weights.add((ArrayList<Double>)node.getWeights().clone());
+			if(isWeightChange){
+				weights.add((ArrayList<Double>)node.getPrevWeightChange().clone());
+			}
+			else{
+				weights.add((ArrayList<Double>)node.getWeights().clone());
+			}
 		}
 		return weights;
 	}
 	
 	/**
 	 * Creates a Network given a representative weighted adjacency matrix
-	 * @param configuration the configuration fo the network
 	 * @param weights matrix the weighted adjacency matrix representing a network
 	 * @return the network represented by the weighted adjacency matrix
 	 */
-	static Network deserializeToNetwork(ArrayList<Integer> configuration, ArrayList<ArrayList<Double>> weights){
+	static Network deserializeToNetwork(ArrayList<ArrayList<Double>> weights){
 		
-		Network network = new Network(configuration);
+		Network network = new Network(false);
 		network.setWeights(weights, false);
 		return network;
 	}
