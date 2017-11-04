@@ -4,7 +4,6 @@
 package neuralNetworkTrainer;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * The Network class is a container for a neural network.
@@ -41,9 +40,14 @@ class  Network {
 		ArrayList<ArrayList<Double>> weights = new ArrayList<>();
 		ArrayList<ArrayList<Double>> weightChange = new ArrayList<>();
 		
-		// create output layer, these nodes use linear function and have no downstream nodes
+		// create output layer, these nodes use linear function for regression problem and sigmoidal for classification; they have no downstream nodes
 		for(int nodeIter = 0; nodeIter < Driver.configuration.get(Driver.configuration.size() - 1); nodeIter++){
-			this.outputLayer.getNodes().add(nodeIter, new Node(new LinearFunction(), new ArrayList<Node>(), nodeIter));
+			if(Driver.isClassificationNetwork){
+				this.outputLayer.getNodes().add(nodeIter, new Node(new SigmoidalFunction(), new ArrayList<Node>(), nodeIter));
+			}
+			else{
+				this.outputLayer.getNodes().add(nodeIter, new Node(new LinearFunction(), new ArrayList<Node>(), nodeIter));
+			}
 			if(setRandomWeights){
 				ArrayList<Double> weightVector = new ArrayList<>();
 				ArrayList<Double> weightChangeVector = new ArrayList<>();

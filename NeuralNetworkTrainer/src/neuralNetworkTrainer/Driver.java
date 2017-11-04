@@ -178,7 +178,7 @@ class Driver {
 	private static boolean setDataFile(String input){
 		Driver.dataFile = new File(input);
 		if(!dataFile.exists()){
-			System.out.println("The file does not exist, try again.\n");
+			System.out.println(input + " does not exist.\n");
 			return false;
 		}
 		return true;
@@ -196,16 +196,16 @@ class Driver {
 				Driver.trainingAlgorithm = new Backprop();
 				break;
 			case "-ga":
-				//Driver.trainingAlgorithm = new GA();
+				Driver.trainingAlgorithm = new GeneticAlgorithm();
 				break;
 			case "-es":
-				//Driver.trainingAlgorithm = new ES();
+				Driver.trainingAlgorithm = new EvolutionStrategy();
 				break;
 			case "-de":
-				//Driver.trainingAlgorithm = new DE();
+				Driver.trainingAlgorithm = new DifferentialEvolution();
 				break;
 			default:
-				System.out.println("The training algorithm is wrong, try again.\n");
+				System.out.println(input + "is not a valid training algorithm.\n");
 				flag = false;
 		}
 		return flag;
@@ -225,7 +225,7 @@ class Driver {
 			return true;
 		}
 		else{
-			System.out.println("The network configuration is wrong, try again.\n");
+			System.out.println(input + " is an invalid network configuration.\n");
 			return false;
 		}
 	}
