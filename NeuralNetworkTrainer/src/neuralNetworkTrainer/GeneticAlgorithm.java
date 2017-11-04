@@ -2,15 +2,17 @@ package neuralNetworkTrainer;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Random;
 
 public class GeneticAlgorithm extends TrainingAlgorithm {
 	
 	ArrayList<Integer> rouletteWheel; //used to randomly select parents weighted by their rank
+	ArrayList<ArrayList<Double>> geneStandardDev = new ArrayList<ArrayList<Double>>();
 
 	public ArrayList<Network> generatePopulation(){
 		//if this is the same for GA ES and DE  maybe we should move this functionality to TrainingAlgorithm
 		
-		ArrayList<Network> population = null;
+		ArrayList<Network> population = new ArrayList<Network>();
 		
 		//create populationSize number of individuals and add them to population
 		for(int popIter = 0;  popIter < Driver.populationSize; popIter++) {
@@ -19,8 +21,37 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 			population.add(individual);
 		}
 		this.rouletteWheel = genWheel();
-		
 		return population;
+	}
+	
+	//calculates the standard deviation for every gene in the population across all individuals
+	public void setGeneStDev(ArrayList<ArrayList<ArrayList<Double>>> population) {
+		for (int chromIter = 0; chromIter < population.get(0).size(); chromIter++ ) {
+			for (int geneIter = 0; geneIter < population.get(0).get(0).size(); geneIter++ ) {
+				//find mean of a gene
+				double geneMean = 0;
+				ArrayList<Double> geneValues = new ArrayList<Double>();
+				for (int individualIter = 0; individualIter < population.size(); individualIter++ ) {
+					geneMean += population.get(individualIter).get(chromIter).get(geneIter);
+					//record the value of each gene
+					geneValues.add(population.get(individualIter).get(chromIter).get(geneIter));
+				}
+				//calc mean
+				geneMean = geneMean/ (double) population.size();
+				double squareDistSum = 0;
+				//sum squared distance from mean to geneValues
+				for (Double geneVal: geneValues) {
+					squareDistSum += ((geneMean - geneVal) * (geneMean - geneVal));
+				}
+				//divide by number of data points -1 
+				double meanSquareDist = squareDistSum/ (double) population.size();
+				double stdev = Math.sqrt(meanSquareDist);
+
+				geneStandardDev.get(chromIter).add(stdev);
+				
+			}
+			
+		}
 	}
 	
 	//converts matrixes into networks for fitness evaluation
@@ -136,13 +167,32 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 				for(Double gene : chromosome) {
 					if (Math.random() <= Driver.mutationRate) { //gives a mustationRate % chance of a mutation happening on any given gene, lower for higher fitness individuals maybe????
 						//change gene with a random number from a gaussian distribution 
-						//centered at 0 with a standard deviation of 1
-						gene += Driver.randNum.nextGaussian();
+						//centered at 0
+						//standard deviation is the standard deviation for that particular gene
+						gene += (geneStandardDev.get(individual.indexOf(chromosome)).get(chromosome.indexOf(gene)) * Driver.randNum.nextGaussian());
 					}
 				}
 			}
 		}
 		return offspring;
+	}
+
+	//calls the correct fitness evaluation measure
+	private ArrayList<Network> evalFitness(ArrayList<Network> population) {
+		ArrayList<Network> fitPop = null;
+		if (Driver.isClassificationNetwork) {
+			fitPop = evalClasificationFitness(population);
+		}
+		else {
+			fitPop = evalFunApproxFitness(population);
+		}
+		return fitPop;
+	}
+	
+
+	private ArrayList<Network> evalFunApproxFitness(ArrayList<Network> population) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	//classification
@@ -185,13 +235,14 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		ArrayList<ArrayList<ArrayList<Double>>> serializedOffspring = new ArrayList<ArrayList<ArrayList<Double>>>();
 
 		ArrayList<Network> population = generatePopulation();
-		population = evalClasificationFitness(population);
+		population = evalFitness(population);
 		while(hasConverged(population, prevPopulation)){
 			serializedPopulation = serializePopulation(population);
+			setGeneStDev(serializedPopulation);
 			prevPopulation = population;
 			serializedOffspring = newGeneration(serializedPopulation);
 			offspring = deserializePopulation(serializedOffspring);
-			offspring = evalClasificationFitness(offspring);
+			offspring = evalFitness(offspring);
 		//	replacePop(offspring, offspring.fitness)
 		//}
 		//return population;
@@ -199,7 +250,7 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		//returns highest fit individual after convergence
 		return population.get(population.size() - 1);
 	}
-	
+
 	//creates the roulette wheel for rank based selection
 	//every value in the wheel corresponds to a rank
 	//ranks with higher fiteness are more represented in the wheel
