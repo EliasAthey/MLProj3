@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class GeneticAlgorithm extends TrainingAlgorithm {
+	
+	ArrayList<Integer> rouletteWheel;
 
 	public ArrayList<Network> generatePopulation(){
 		//if this is the same for GA ES and DE  maybe we should move this functionality to TrainingAlgorithm
@@ -18,20 +20,64 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 			Network individual = new Network(Driver.configuration); //do we need to randomize the weights????
 			population.add(individual);
 		}
+		this.rouletteWheel = genWheel();
+		
 		return population;
 	}
 	
-	public ArrayList<Network> selectParents(ArrayList<Network> population){
-		//TODO
-		//using rank
-		//make parent pairs
-		//
-		return null;
+	public ArrayList<Network>  deserializePopulation (ArrayList<ArrayList<ArrayList<Double>>> population) {
+		ArrayList<Network> deserializedPopulation = new ArrayList<Network>();
+		
+		for (ArrayList<ArrayList<Double>> individual : population) {
+			deserializedPopulation.add(Network.deserializeToNetwork(Driver.configuration, individual));
+		}
+		
+		return deserializedPopulation;
 	}
 	
+	public ArrayList<ArrayList<ArrayList<Double>>> serializePopulation( ArrayList<Network> population){
+		ArrayList<ArrayList<ArrayList<Double>>> serializedPopulation = new ArrayList<ArrayList<ArrayList<Double>>>();
+		
+		for (Network individual : population) {
+			serializedPopulation.add(Network.serializeNetwork(individual));
+		}
+		
+		return serializedPopulation;
+	}
+	
+	//This is specific to having 2 offspring from 2 parents
+	//I could modify it to create more or less offspring or use more parents
+	//I think this is good for now though
+	public  ArrayList<ArrayList<ArrayList<Double>>> newGeneration( ArrayList<ArrayList<ArrayList<Double>>> population){
+		
+		ArrayList<ArrayList<ArrayList<Double>>> offspringPool = new ArrayList<ArrayList<ArrayList<Double>>>();
+		ArrayList<ArrayList<ArrayList<Double>>> parentPair;
+		ArrayList<ArrayList<ArrayList<Double>>> offspringPair;
+		
+		while(offspringPool.size() < Driver.numberOffspring) {
+			parentPair = selectParents(population);
+			offspringPair = crossoverOffspring(parentPair.get(0), parentPair.get(1));
+			offspringPool.add(offspringPair.get(0));
+			offspringPool.add(offspringPair.get(1));
+		}
+		offspringPool = mutateOffspring(offspringPool);
+		return offspringPool;
+	}
+	
+	public ArrayList<ArrayList<ArrayList<Double>>> selectParents(ArrayList<ArrayList<ArrayList<Double>>> population){
+
+		ArrayList<ArrayList<ArrayList<Double>>> parentPair = new ArrayList<ArrayList<ArrayList<Double>>>();
+		
+		//select 2 parents randomly based on rank using the roulette wheel
+		parentPair.add(population.get(this.rouletteWheel.get(Driver.randNum.nextInt(this.rouletteWheel.size()))));
+		parentPair.add(population.get(this.rouletteWheel.get(Driver.randNum.nextInt(this.rouletteWheel.size()))));
+		
+		return parentPair;
+	}
+	
+	
 	public ArrayList<ArrayList<ArrayList<Double>>> crossoverOffspring(ArrayList<ArrayList<Double>> parent1, ArrayList<ArrayList<Double>> parent2){
-		//TODO
-		//make random arraylist of boolean arraylists that is the same size of the parents
+
 		ArrayList<ArrayList<Boolean>> randomizer = new ArrayList<ArrayList<Boolean>>();
 		
 		for(int outerIter = 0; outerIter < parent1.size(); outerIter++) {
@@ -86,7 +132,6 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 				}
 			}
 		}
-		//TODO
 		return offspring;
 	}
 
@@ -119,22 +164,41 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		return null;
 	}
 	
+	//maybe we can pass this a boolean to differentiate between classification and function approx
+	//we would only need to check the boolean for eval fitness, maybe hasConverged
 	@Override
 	Network train() {
 		// TODO 
-		//initialize population
-		//evaluateFitness(population)
-		//while(hasConverged()){
-		//	serialize population
-		//	selectOffspring()
-		//	crossoverOffspring() -- uniform crossover
-		//	mutateOffspring() -----	done 
-		//	unserialize population
-		//	evaluateFitness(offspring)
+		ArrayList<Network> prevPopulation = null;
+		ArrayList<Network> offspring =null;
+		ArrayList<ArrayList<ArrayList<Double>>> serializedPopulation = new ArrayList<ArrayList<ArrayList<Double>>>();
+		ArrayList<ArrayList<ArrayList<Double>>> serializedOffspring = new ArrayList<ArrayList<ArrayList<Double>>>();
+
+		ArrayList<Network> population = generatePopulation();
+		population = evalClasificationFitness(population);
+		while(hasConverged(population, prevPopulation)){
+			serializedPopulation = serializePopulation(population);
+			prevPopulation = population;
+			serializedOffspring = newGeneration(serializedPopulation);
+			offspring = deserializePopulation(serializedOffspring);
+			offspring = evalClasificationFitness(offspring);
 		//	replacePop(offspring, offspring.fitness)
 		//}
 		//return population;
-		return null;
+		return new Network(null);
+		}
 	}
+	
 
+	public ArrayList<Integer> genWheel(){
+		ArrayList<Integer> wheel = null;
+		
+		for (int rank = 0; rank < Driver.populationSize; rank++) {
+			for (int rankIter = 0; rankIter <= (rank/2); rankIter++) {
+				wheel.add(rank);
+			}
+		}
+		
+		return wheel;
+	}
 }
