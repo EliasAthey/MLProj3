@@ -5,7 +5,7 @@ import java.util.Collections;
 
 public class GeneticAlgorithm extends TrainingAlgorithm {
 	
-	ArrayList<Integer> rouletteWheel;
+	ArrayList<Integer> rouletteWheel; //used to randomly select parents weighted by their rank
 
 	public ArrayList<Network> generatePopulation(){
 		//if this is the same for GA ES and DE  maybe we should move this functionality to TrainingAlgorithm
@@ -15,9 +15,7 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		//create populationSize number of individuals and add them to population
 		for(int popIter = 0;  popIter < Driver.populationSize; popIter++) {
 			
-			//adding a global config in driver might be worth doing
-			//or passing config through train() to all these methods
-			Network individual = new Network(Driver.configuration); //do we need to randomize the weights????
+			Network individual = new Network(Driver.configuration);
 			population.add(individual);
 		}
 		this.rouletteWheel = genWheel();
@@ -25,6 +23,7 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		return population;
 	}
 	
+	//converts matrixes into networks for fitness evaluation
 	public ArrayList<Network>  deserializePopulation (ArrayList<ArrayList<ArrayList<Double>>> population) {
 		ArrayList<Network> deserializedPopulation = new ArrayList<Network>();
 		
@@ -35,6 +34,7 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		return deserializedPopulation;
 	}
 	
+	//converts networks into matrixes for reproduction 
 	public ArrayList<ArrayList<ArrayList<Double>>> serializePopulation( ArrayList<Network> population){
 		ArrayList<ArrayList<ArrayList<Double>>> serializedPopulation = new ArrayList<ArrayList<ArrayList<Double>>>();
 		
@@ -45,25 +45,28 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		return serializedPopulation;
 	}
 	
-	//This is specific to having 2 offspring from 2 parents
-	//I could modify it to create more or less offspring or use more parents
-	//I think this is good for now though
+	//creates a new generation using rank based selection of parents, crossover and mutation, then returns the new generation
+	//This is specific to having 2 offspring from 2 parents but is generalizable to any number of parents and offspring with a little refactoring
 	public  ArrayList<ArrayList<ArrayList<Double>>> newGeneration( ArrayList<ArrayList<ArrayList<Double>>> population){
 		
-		ArrayList<ArrayList<ArrayList<Double>>> offspringPool = new ArrayList<ArrayList<ArrayList<Double>>>();
-		ArrayList<ArrayList<ArrayList<Double>>> parentPair;
-		ArrayList<ArrayList<ArrayList<Double>>> offspringPair;
+		ArrayList<ArrayList<ArrayList<Double>>> offspringPool = new ArrayList<ArrayList<ArrayList<Double>>>(); 	//holds the new offspring
+		ArrayList<ArrayList<ArrayList<Double>>> parentPair; 													//holds 2 parents for crossover / reproduction
+		ArrayList<ArrayList<ArrayList<Double>>> offspringPair;													//holds the 2 offspring created by crossover
 		
-		while(offspringPool.size() < Driver.numberOffspring) {
-			parentPair = selectParents(population);
-			offspringPair = crossoverOffspring(parentPair.get(0), parentPair.get(1));
-			offspringPool.add(offspringPair.get(0));
-			offspringPool.add(offspringPair.get(1));
+		while(offspringPool.size() < Driver.numberOffspring) {													//continue until the new generation is the required offspring size
+			parentPair = selectParents(population);											//selects 2 parents with rank based selection
+			offspringPair = crossoverOffspring(parentPair.get(0), parentPair.get(1));		//creates 2 new offspring via crossover
+			offspringPool.add(offspringPair.get(0));			//adds new offspring to the new generation
+			offspringPool.add(offspringPair.get(1));			//adds new offspring to the new generation
 		}
-		offspringPool = mutateOffspring(offspringPool);
+
+		offspringPool = mutateOffspring(offspringPool);			//mutates all offspring
+		
 		return offspringPool;
 	}
 	
+	//uses the roulette wheel to select 2 parents at random 
+	//while giving higher ranked individuals a higher chance of being picked
 	public ArrayList<ArrayList<ArrayList<Double>>> selectParents(ArrayList<ArrayList<ArrayList<Double>>> population){
 
 		ArrayList<ArrayList<ArrayList<Double>>> parentPair = new ArrayList<ArrayList<ArrayList<Double>>>();
@@ -75,16 +78,19 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		return parentPair;
 	}
 	
-	
+	//creates a List of boolean Lists that mirrors the dimensions and structure of an individual
+	//uses the list to randomly assign genes from parents to offspring
 	public ArrayList<ArrayList<ArrayList<Double>>> crossoverOffspring(ArrayList<ArrayList<Double>> parent1, ArrayList<ArrayList<Double>> parent2){
-
+		
+		//List of boolean Lists to decide if offspring get their genes from parent1 or parent2 
 		ArrayList<ArrayList<Boolean>> randomizer = new ArrayList<ArrayList<Boolean>>();
 		
-		for(int outerIter = 0; outerIter < parent1.size(); outerIter++) {
+		for(int chromIter = 0; chromIter < parent1.size(); chromIter++) {
 			
+			//a chromosome of random booleans that is the same length of the chromosomes of the parents and offspring
 			ArrayList<Boolean> randChrom = new ArrayList<Boolean>();
-			
-			for(int innerIter = 0; innerIter < parent1.get(0).size(); innerIter++) {
+			for(int geneIter = 0; geneIter < parent1.get(0).size(); geneIter++) {
+				//fill every randChrom with random booleans
 				randChrom.add(Driver.randNum.nextBoolean());
 			}
 			
@@ -96,29 +102,33 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		ArrayList<ArrayList<Double>> offspring2 = new ArrayList<ArrayList<Double>>();
 		
 		//randomizer selects which offspring gets which gene
-		for(int outerIter = 0; outerIter < parent1.size(); outerIter++) {
+		for(int chromIter = 0; chromIter < parent1.size(); chromIter++) {
 			offspring1.add(new ArrayList<Double>());
 			offspring2.add(new ArrayList<Double>());
 			
-			for(int innerIter = 0; innerIter < parent1.get(0).size(); innerIter++) {
+			for(int geneIter = 0; geneIter < parent1.get(0).size(); geneIter++) {
 				
-				if (randomizer.get(outerIter).get(innerIter)) {
-					offspring1.get(outerIter).add(parent1.get(outerIter).get(innerIter));
-					offspring2.get(outerIter).add(parent2.get(outerIter).get(innerIter));
+				if (randomizer.get(chromIter).get(geneIter)) {//give the double from parent1 to offspring1 and p2 to offsp2
+					offspring1.get(chromIter).add(parent1.get(chromIter).get(geneIter));
+					offspring2.get(chromIter).add(parent2.get(chromIter).get(geneIter));
 				}
 				
 				else {//flip which offspring get which gene
-					offspring2.get(outerIter).add(parent1.get(outerIter).get(innerIter));
-					offspring2.get(outerIter).add(parent2.get(outerIter).get(innerIter));
+					offspring2.get(chromIter).add(parent1.get(chromIter).get(geneIter));
+					offspring2.get(chromIter).add(parent2.get(chromIter).get(geneIter));
 				}
 			}
 		}
+		//create the offspring pair that will be returned
 		ArrayList<ArrayList<ArrayList<Double>>> offspringPair = new ArrayList<ArrayList<ArrayList<Double>>>();
 		offspringPair.add(offspring2);
 		offspringPair.add(offspring1);
 		return offspringPair;
 	}
-
+	
+	//for any number of offspring:
+	//look at every Double and with a Driver.mutationRate chance
+	//change that value by getting a random gaussian distributed number centered at 0 with a standard deviation of 1
 	public ArrayList<ArrayList<ArrayList<Double>>> mutateOffspring(ArrayList<ArrayList<ArrayList<Double>>> offspring){
 		for (ArrayList<ArrayList<Double>> individual : offspring) {
 
@@ -185,11 +195,16 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		//	replacePop(offspring, offspring.fitness)
 		//}
 		//return population;
-		return new Network(null);
 		}
+		//returns highest fit individual after convergence
+		return population.get(population.size() - 1);
 	}
 	
-
+	//creates the roulette wheel for rank based selection
+	//every value in the wheel corresponds to a rank
+	//ranks with higher fiteness are more represented in the wheel
+	//sampling randomly from the wheel will give higher fitness ranks 
+	//a greater chance of being selected 
 	public ArrayList<Integer> genWheel(){
 		ArrayList<Integer> wheel = null;
 		
