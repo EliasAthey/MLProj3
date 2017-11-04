@@ -40,7 +40,10 @@ class  Network {
 
 		ArrayList<ArrayList<Double>> weights = new ArrayList<>();
 		ArrayList<ArrayList<Double>> weightChange = new ArrayList<>();
-		int weightIndexCounter = Driver.configuration.stream().mapToInt(Integer :: intValue).sum() - 1;
+		int weightIndexCounter = -1;
+		for(int x : Driver.configuration){
+			weightIndexCounter += x;
+		}
 		
 		// create output layer, these nodes use linear function and have no downstream nodes
 		for(int nodeIter = 0; nodeIter < Driver.configuration.get(Driver.configuration.size() - 1); nodeIter++){
@@ -62,10 +65,9 @@ class  Network {
 		ArrayList<Node> downstreamNodes = this.outputLayer.getNodes();
 		for(int layerIter = Driver.configuration.size() - 2; layerIter > 0; layerIter--){
 			this.hiddenLayers.add(new Layer());
+			weightIndexCounter -= Driver.configuration.get(layerIter);
 		}
 		for(int layerIter = Driver.configuration.size() - 2; layerIter > 0; layerIter--){
-
-			weightIndexCounter -= Driver.configuration.get(layerIter);
 
 			// create hidden nodes for this layer, these nodes use sigmoidal function
 			for(int nodeIter = 0; nodeIter < Driver.configuration.get(layerIter); nodeIter++){
@@ -85,7 +87,6 @@ class  Network {
 				}
 			}
 			downstreamNodes = this.hiddenLayers.get(layerIter - 1).getNodes();
-			weightIndexCounter -= Driver.configuration.get(layerIter);
 		}
 		
 		// create input layer, these node use sigmoidal function
