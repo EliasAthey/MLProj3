@@ -47,11 +47,6 @@ class Driver {
 	static int numberOffspring; // "lambda"
 	static double mutationRate; // used by GA and ES
 	static double beta;         // used by DE
-
-	/**
-	 * Random number generator
-	 */
-	public static Random randNum = new Random();
 	
 	/**
 	 * The entry point of the application

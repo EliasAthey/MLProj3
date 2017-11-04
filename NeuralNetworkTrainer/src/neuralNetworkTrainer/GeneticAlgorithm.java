@@ -7,8 +7,9 @@ import java.util.Random;
 public class GeneticAlgorithm extends TrainingAlgorithm {
 	
 	ArrayList<Integer> rouletteWheel; //used to randomly select parents weighted by their rank
-	ArrayList<ArrayList<Double>> geneStandardDev = new ArrayList<ArrayList<Double>>();
-
+	ArrayList<ArrayList<Double>> geneStandardDev = new ArrayList<ArrayList<Double>>(); //holds standardDev of all genes 
+	Random randNum = new Random();
+	
 	public ArrayList<Network> generatePopulation(){
 		//if this is the same for GA ES and DE  maybe we should move this functionality to TrainingAlgorithm
 		
@@ -103,8 +104,8 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		ArrayList<ArrayList<ArrayList<Double>>> parentPair = new ArrayList<ArrayList<ArrayList<Double>>>();
 		
 		//select 2 parents randomly based on rank using the roulette wheel
-		parentPair.add(population.get(this.rouletteWheel.get(Driver.randNum.nextInt(this.rouletteWheel.size()))));
-		parentPair.add(population.get(this.rouletteWheel.get(Driver.randNum.nextInt(this.rouletteWheel.size()))));
+		parentPair.add(population.get(this.rouletteWheel.get(this.randNum.nextInt(this.rouletteWheel.size()))));
+		parentPair.add(population.get(this.rouletteWheel.get(this.randNum.nextInt(this.rouletteWheel.size()))));
 		
 		return parentPair;
 	}
@@ -122,7 +123,7 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 			ArrayList<Boolean> randChrom = new ArrayList<Boolean>();
 			for(int geneIter = 0; geneIter < parent1.get(0).size(); geneIter++) {
 				//fill every randChrom with random booleans
-				randChrom.add(Driver.randNum.nextBoolean());
+				randChrom.add(this.randNum.nextBoolean());
 			}
 			
 			randomizer.add(randChrom);
@@ -146,7 +147,7 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 				
 				else {//flip which offspring get which gene
 					offspring2.get(chromIter).add(parent1.get(chromIter).get(geneIter));
-					offspring2.get(chromIter).add(parent2.get(chromIter).get(geneIter));
+					offspring1.get(chromIter).add(parent2.get(chromIter).get(geneIter));
 				}
 			}
 		}
@@ -169,7 +170,7 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 						//change gene with a random number from a gaussian distribution 
 						//centered at 0
 						//standard deviation is the standard deviation for that particular gene
-						gene += (geneStandardDev.get(individual.indexOf(chromosome)).get(chromosome.indexOf(gene)) * Driver.randNum.nextGaussian());
+						gene += (geneStandardDev.get(individual.indexOf(chromosome)).get(chromosome.indexOf(gene)) * this.randNum.nextGaussian());
 					}
 				}
 			}
@@ -231,12 +232,12 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		// TODO 
 		ArrayList<Network> prevPopulation = null;
 		ArrayList<Network> offspring =null;
-		ArrayList<ArrayList<ArrayList<Double>>> serializedPopulation = new ArrayList<ArrayList<ArrayList<Double>>>();
-		ArrayList<ArrayList<ArrayList<Double>>> serializedOffspring = new ArrayList<ArrayList<ArrayList<Double>>>();
+		ArrayList<ArrayList<ArrayList<Double>>> serializedPopulation = new ArrayList<>();
+		ArrayList<ArrayList<ArrayList<Double>>> serializedOffspring = new ArrayList<>();
 
 		ArrayList<Network> population = generatePopulation();
 		population = evalFitness(population);
-		while(hasConverged(population, prevPopulation)){
+		while(!hasConverged(population, prevPopulation)){
 			serializedPopulation = serializePopulation(population);
 			setGeneStDev(serializedPopulation);
 			prevPopulation = population;
