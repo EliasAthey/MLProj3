@@ -103,16 +103,16 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		//evalutaion set of data == eval
 		ArrayList<ArrayList<Double>> eval = new ArrayList<ArrayList<Double>>();
 		
-		for(Network individual: population) {
-			double fitness;
-			for(Object datapoint: eval) {
-				if(individual.evaluate(eval)) { //returns true or false for classification
-					fitness++;
-				}
-			}
-			
-			fitness = fitness/eval.size();
-		}
+//		for(Network individual: population) {
+//			double fitness;
+//			for(Object datapoint: eval) {
+//				if(individual.evaluate(eval)) { //returns true or false for classification
+//					fitness++;
+//				}
+//			}
+//
+//			fitness = fitness/eval.size();
+//		}
 		
 		//sorts population based on fitness
 		Collections.sort(population);
