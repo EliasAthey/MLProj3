@@ -56,12 +56,6 @@ class Driver {
 	 */
 	public static void main(String[] args) {
 
-		// testing
-		for (String x :
-				args) {
-			System.out.println(x);
-		}
-
 		// Check for three required parameters
 		if(args.length < 3){
 			Driver.displayHelpText();
@@ -98,7 +92,6 @@ class Driver {
 						// learning rate
 						case "-lr":
 							if(argIter + 1 < args.length && Pattern.matches("\\d+\\.\\d+", args[argIter + 1])){
-								System.out.println("Learning rate: " + args[argIter + 1]);
 								Driver.learningRate = Float.parseFloat(args[++argIter]);
 							}
 							else{
@@ -109,7 +102,6 @@ class Driver {
 						// momentum
 						case "-m":
 							if(argIter + 1 < args.length && Pattern.matches("\\d+\\.\\d+", args[argIter + 1])){
-								System.out.println("Momentum: " + args[argIter + 1]);
 								Driver.momentum = Float.parseFloat(args[++argIter]);
 							}
 							else{
@@ -120,7 +112,6 @@ class Driver {
 						// size of population
 						case "-p":
 							if(argIter + 1 < args.length && Pattern.matches("\\d+", args[argIter + 1])){
-								System.out.println("Population size: " + args[argIter + 1]);
 								Driver.populationSize = Integer.parseInt(args[++argIter]);
 							}
 							else{
@@ -131,7 +122,6 @@ class Driver {
 						// number of offspring generated each iteration
 						case "-o":
 							if(argIter + 1 < args.length && Pattern.matches("\\d+", args[argIter + 1])){
-								System.out.println("Offspring size: " + args[argIter + 1]);
 								Driver.numberOffspring = Integer.parseInt(args[++argIter]);
 							}
 							else{
@@ -142,7 +132,6 @@ class Driver {
 						// mutation rate
 						case "-mr":
 							if(argIter + 1 < args.length && Pattern.matches("\\d+\\.\\d+", args[argIter + 1])){
-								System.out.println("Mutation rate: " + args[argIter + 1]);
 								Driver.mutationRate = Float.parseFloat(args[++argIter]);
 							}
 							else{
@@ -153,7 +142,6 @@ class Driver {
 						// DE beta parameter
 						case "-b":
 							if(argIter + 1 < args.length && Pattern.matches("\\d+\\.\\d+", args[argIter + 1])){
-								System.out.println("Beta: " + args[argIter + 1]);
 								Driver.beta = Float.parseFloat(args[++argIter]);
 							}
 							else{
@@ -168,19 +156,9 @@ class Driver {
 					}
 				}
 			}
+			System.out.println("Starting training...\n");
+			Driver.train();
 		}
-		System.out.println("Success\n");
-
-		
-		// test backprop
-//		Driver.configuration = new ArrayList<>();
-//		Driver.configuration.add(0, 2);// inputs
-//		Driver.configuration.add(1, 20);// first hidden layer
-//		Driver.configuration.add(2, 1);// output
-//		Driver.learningRate = 0.04;
-//		Driver.momentum = 0.4;
-//		Driver.trainingAlgorithm = new Backprop();
-//		Driver.train();
 	}
 	
 	/**
@@ -253,9 +231,29 @@ class Driver {
 	}
 
 	/**
-	 * Displays the help text for the program, specifically how to input parameters
+	 * Displays the help text for the program
 	 */
 	private static void displayHelpText(){
-		System.out.println("HELP!\n");
+		System.out.println("usage:   java -jar NeuralNetworkTrainer.jar <datafile> <training-algorithm> <network-configuration> [parameters]");
+		System.out.println("\n<datafile>:              path to file containing a data set");
+		System.out.println("\n<training-algorithm>:      -bp (backprop)");
+		System.out.println("                           -ga (genetic algorithm)");
+		System.out.println("                           -es (evolution strategy)");
+		System.out.println("                           -de (differential evolution)");
+		System.out.println("\n<network-configuration>:   a-b[-c]*");
+		System.out.println("                           a,b,c,... are positive integers representing the number of nodes in each respective layer");
+		System.out.println("                           the leftmost value is the input layer, the rightmost is the output layer, any values in between are hidden layers");
+		System.out.println("                           any network must have at least 2 layers (input and output)");
+		System.out.println("                           examples:   3-1 is the network with 3 input nodes and 1 output node, no hidden nodes");
+		System.out.println("                                       3-20-1 is the network with 3 input nodes, 20 hidden nodes, and 1 output node");
+		System.out.println("\nparameters:   [-c][-lr <learning rate>][-m <momentum>][-p <population-size>]");
+		System.out.println("                [-o <offspring-size>][-mr <mutation rate>][-b <beta>]");
+		System.out.println("\n-c    defines  a  CLASSIFICATION problem, assumes linear regression otherwise");
+		System.out.println("-lr   defines the LEARNING RATE used by backprop");
+		System.out.println("-m    defines the MOMENTUM used by backprop");
+		System.out.println("-p    defines the POPULATION SIZE used by evolutionary algorithms");
+		System.out.println("-o    defines the OFFSPRING SIZE used by evolutionary algorithms");
+		System.out.println("-mr   defines the MUTATION RATE used by genetic algorithm and evolution strategy");
+		System.out.println("-b    defines the BETA parameter used by differential evolution\n");
 	}
 }
