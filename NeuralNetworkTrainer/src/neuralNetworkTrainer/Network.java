@@ -40,10 +40,6 @@ class  Network {
 
 		ArrayList<ArrayList<Double>> weights = new ArrayList<>();
 		ArrayList<ArrayList<Double>> weightChange = new ArrayList<>();
-		int weightIndexCounter = -1;
-		for(int x : Driver.configuration){
-			weightIndexCounter += x;
-		}
 		
 		// create output layer, these nodes use linear function and have no downstream nodes
 		for(int nodeIter = 0; nodeIter < Driver.configuration.get(Driver.configuration.size() - 1); nodeIter++){
@@ -57,7 +53,6 @@ class  Network {
 				}
 				weights.add(weightVector);
 				weightChange.add(weightChangeVector);
-				weightIndexCounter--;
 			}
 		}
 		
@@ -65,7 +60,6 @@ class  Network {
 		ArrayList<Node> downstreamNodes = this.outputLayer.getNodes();
 		for(int layerIter = Driver.configuration.size() - 2; layerIter > 0; layerIter--){
 			this.hiddenLayers.add(new Layer());
-			weightIndexCounter -= Driver.configuration.get(layerIter);
 		}
 		for(int layerIter = Driver.configuration.size() - 2; layerIter > 0; layerIter--){
 
@@ -81,9 +75,8 @@ class  Network {
 						weightVector.add(weightIter, Math.pow(-1, (int)(Math.random() * 2)) * Math.random() * 0.5);
 						weightChangeVector.add(0, 0.0);
 					}
-					weights.add(weightIndexCounter, weightVector);
-					weightChange.add(weightIndexCounter, weightChangeVector);
-					weightIndexCounter++;
+					weights.add(nodeIter, weightVector);
+					weightChange.add(nodeIter, weightChangeVector);
 				}
 			}
 			downstreamNodes = this.hiddenLayers.get(layerIter - 1).getNodes();
@@ -92,7 +85,6 @@ class  Network {
 		// create input layer, these node use sigmoidal function
 		for(int nodeIter = 0; nodeIter < Driver.configuration.get(0); nodeIter++){
 			this.inputLayer.getNodes().add(nodeIter, new Node(new SigmoidalFunction(), downstreamNodes, nodeIter));
-			weightIndexCounter -= Driver.configuration.get(0);
 
 			// set input weights to 1
 			if(setRandomWeights){
@@ -100,9 +92,8 @@ class  Network {
 				ArrayList<Double> weightChangeVector = new ArrayList<>();
 				weightVector.add(0, 1.0);
 				weightChangeVector.add(0, 0.0);
-				weights.add(weightIndexCounter, weightVector);
-				weightChange.add(weightIndexCounter, weightChangeVector);
-				weightIndexCounter++;
+				weights.add(nodeIter, weightVector);
+				weightChange.add(nodeIter, weightChangeVector);
 			}
 		}
 
