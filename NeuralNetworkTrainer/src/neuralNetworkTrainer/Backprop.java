@@ -51,17 +51,13 @@ class Backprop extends TrainingAlgorithm {
 			for(ArrayList<Object> samplePoint : dataset){
 
 				// set inputs and expected outputs
+				network.clearInputs();
+				expectedOutput.clear();
 				for(int inputIter = 0; inputIter < samplePoint.size(); inputIter++){
 					if(inputIter < samplePoint.size() - Driver.dataset.getNumOutputs()){
-						if(inputIter == 0){
-							network.getInputLayer().getNodes().get(inputIter).getInputs().clear();
-						}
 						network.getInputLayer().getNodes().get(inputIter).getInputs().add(samplePoint.get(inputIter));
 					}
 					else{
-						if(inputIter == 0){
-							expectedOutput.clear();
-						}
 						expectedOutput.add(samplePoint.get(inputIter));
 					}
 				}
