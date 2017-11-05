@@ -14,9 +14,9 @@ import java.util.regex.Pattern;
 class Driver {
 
 	/**
-	 * The file for the data set
+	 * The data set
 	 */
-	private static File dataFile;
+	private static Data dataset;
 
 	/**
 	 * The training algorithm to use
@@ -176,12 +176,25 @@ class Driver {
 	 * @return true if the operation is successful, false otherwise
 	 */
 	private static boolean setDataFile(String input){
-		Driver.dataFile = new File(input);
-		if(!dataFile.exists()){
-			System.out.println(input + " does not exist.\n");
-			return false;
+		boolean flag = true;
+		switch(input){
+			case "machine":
+				Driver.dataset = new MachineData();
+				break;
+			case "flare":
+				Driver.dataset = new FlareData();
+				break;
+			case "tictactoe":
+				Driver.dataset = new TTTData();
+				break;
+			case "glass":
+				Driver.dataset = new GlassData();
+				break;
+			default:
+				System.out.println(input + "is not a valid datafile.\n");
+				flag = false;
 		}
-		return true;
+		return flag;
 	}
 
 	/**
@@ -235,7 +248,10 @@ class Driver {
 	 */
 	private static void displayHelpText(){
 		System.out.println("usage:   java -jar NeuralNetworkTrainer.jar <datafile> <training-algorithm> <network-configuration> [parameters]");
-		System.out.println("\n<datafile>:              path to file containing a data set");
+		System.out.println("\n<datafile>:                machine");
+		System.out.println("                           flare");
+		System.out.println("                           tictactoe");
+		System.out.println("                           glass");
 		System.out.println("\n<training-algorithm>:      -bp (backprop)");
 		System.out.println("                           -ga (genetic algorithm)");
 		System.out.println("                           -es (evolution strategy)");

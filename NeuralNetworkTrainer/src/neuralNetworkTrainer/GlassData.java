@@ -1,4 +1,4 @@
 package neuralNetworkTrainer;
 
-public class GlassData {
+public class GlassData extends Data{
 }

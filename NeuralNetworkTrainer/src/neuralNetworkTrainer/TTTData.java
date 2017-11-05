@@ -1,4 +1,4 @@
 package neuralNetworkTrainer;
 
-public class TTTData {
+public class TTTData extends Data{
 }

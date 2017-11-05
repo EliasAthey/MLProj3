@@ -1,4 +1,4 @@
 package neuralNetworkTrainer;
 
-public class FlareData {
+public class FlareData extends Data{
 }
