@@ -14,7 +14,7 @@ class Node {
 	/**
 	 * the inputs to this node
 	 */
-	private ArrayList<Double> inputs;
+	private ArrayList<Object> inputs;
 	
 	/**
 	 * the associated weights to the inputs
@@ -39,7 +39,7 @@ class Node {
 	/**
 	 * the output computed by this node
 	 */
-	private Double computedOutput;
+	private Object computedOutput;
 	
 	/**
 	 * the delta value for this node used by the Backprop algorithm
@@ -58,9 +58,9 @@ class Node {
 	 * @param downstreamNodes the list of downstream nodes
 	 */
 	Node(INodeFunction nodeFunction, ArrayList<Node> downstreamNodes, int indexInLayer){
-		this.inputs = new ArrayList<Double>();
-		this.weights = new ArrayList<Double>();
-		this.prevWeightChange = new ArrayList<Double>();
+		this.inputs = new ArrayList<>();
+		this.weights = new ArrayList<>();
+		this.prevWeightChange = new ArrayList<>();
 		this.downstream = downstreamNodes;
 		this.nodeFunction = nodeFunction;
 		this.indexInLayer = indexInLayer;
@@ -70,7 +70,7 @@ class Node {
 	 * Gets the inputs to this node
 	 * @return the inputs to this node
 	 */
-	ArrayList<Double> getInputs(){
+	ArrayList<Object> getInputs(){
 		return this.inputs;
 	}
 	
@@ -108,7 +108,7 @@ class Node {
 	 * Gets the computed output of this node
 	 * @return the computed output of this node
 	 */
-	Double getComputedOutput(){
+	Object getComputedOutput(){
 		return this.computedOutput;
 	}
 	
@@ -145,7 +145,7 @@ class Node {
 	 * Gets the derivative of the activation function computed on the output
 	 * @return the derivative of the activation function computed on the output
 	 */
-	Double getDerivative(){
+	Object getDerivative(){
 		return this.nodeFunction.getDerivative();
 	}
 }

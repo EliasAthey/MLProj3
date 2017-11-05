@@ -244,5 +244,22 @@ class  Network {
 			weightsIter++;
 		}
 	}
+
+	/**
+	 * clears all inputs in the network
+	 */
+	public void clearInputs(){
+		for(Node node : this.inputLayer.getNodes()){
+			node.getInputs().clear();
+		}
+		for(Layer layer : this.hiddenLayers){
+			for(Node node : layer.getNodes()){
+				node.getInputs().clear();
+			}
+		}
+		for(Node node : this.outputLayer.getNodes()){
+			node.getInputs().clear();
+		}
+	}
 }
 
