@@ -140,8 +140,9 @@ class Backprop extends TrainingAlgorithm {
 				// print error
 				ArrayList<Double> averagedErrors = this.getAveragedSquareError(squaredErrors);
 				for(int i = 0; i < averagedErrors.size(); i++){
-					System.out.println("Average squared error for output node " + i + ": " + averagedErrors.get(i) + "\n");
+					System.out.println("Average squared error for output node " + i + ": " + averagedErrors.get(i) + "");
 				}
+				System.out.println();
 				squaredErrors.clear();
 			}
 			else{
