@@ -3,7 +3,6 @@
  */
 package neuralNetworkTrainer;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
@@ -205,20 +204,20 @@ class Driver {
 	private static boolean setTrainingAlgorithm(String input){
 		boolean flag = true;
 		switch(input){
-			case "-bp":
+			case "bp":
 				Driver.trainingAlgorithm = new Backprop();
 				break;
-			case "-ga":
+			case "ga":
 				Driver.trainingAlgorithm = new GeneticAlgorithm();
 				break;
-			case "-es":
+			case "es":
 				Driver.trainingAlgorithm = new EvolutionStrategy();
 				break;
-			case "-de":
+			case "de":
 				Driver.trainingAlgorithm = new DifferentialEvolution();
 				break;
 			default:
-				System.out.println(input + "is not a valid training algorithm.\n");
+				System.out.println(input + " is not a valid training algorithm.\n");
 				flag = false;
 		}
 		return flag;
@@ -252,10 +251,10 @@ class Driver {
 		System.out.println("                           flare");
 		System.out.println("                           tictactoe");
 		System.out.println("                           glass");
-		System.out.println("\n<training-algorithm>:      -bp (backprop)");
-		System.out.println("                           -ga (genetic algorithm)");
-		System.out.println("                           -es (evolution strategy)");
-		System.out.println("                           -de (differential evolution)");
+		System.out.println("\n<training-algorithm>:      bp (backprop)");
+		System.out.println("                           ga (genetic algorithm)");
+		System.out.println("                           es (evolution strategy)");
+		System.out.println("                           de (differential evolution)");
 		System.out.println("\n<network-configuration>:   a-b[-c]*");
 		System.out.println("                           a,b,c,... are positive integers representing the number of nodes in each respective layer");
 		System.out.println("                           the leftmost value is the input layer, the rightmost is the output layer, any values in between are hidden layers");
