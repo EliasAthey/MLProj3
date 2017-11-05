@@ -19,11 +19,10 @@ class LinearFunction implements INodeFunction {
 	 * @see neuralNetworkTrainer.INodeFunction#execute(neuralNetworkTrainer.Node)
 	 */
 	@Override
-	public Double execute(Node node) {
-		
+	public Object execute(Node node) {
 		Double weightedSum = 0.0;
 		for(int inputIter = 0; inputIter < node.getInputs().size(); inputIter++){
-			weightedSum += node.getInputs().get(inputIter) * node.getWeights().get(inputIter);
+			weightedSum += (Double)node.getInputs().get(inputIter) * node.getWeights().get(inputIter);
 		}
 		return weightedSum;
 	}
@@ -33,7 +32,7 @@ class LinearFunction implements INodeFunction {
 	 * @see neuralNetworkTrainer.INodeFunction#getDerivative()
 	 */
 	@Override
-	public Double getDerivative() {
+	public Object getDerivative() {
 		return this.derivative;
 	}
 }
