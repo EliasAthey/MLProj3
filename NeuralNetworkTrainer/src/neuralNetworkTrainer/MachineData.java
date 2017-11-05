@@ -10,7 +10,9 @@ public class MachineData extends Data{
      * Construct MachineData
      */
     MachineData(){
-        super.dataPoints = new ArrayList<>();
+        numInputs = 6;
+        numOutputs = 1;
+        dataPoints = new ArrayList<>();
         this.setDataPoints();
     }
 
@@ -27,7 +29,7 @@ public class MachineData extends Data{
                 for(String entry : entries){
                     values.add(Integer.parseInt(entry));
                 }
-                super.dataPoints.add(values);
+                dataPoints.add(values);
             }
             catch(NoSuchElementException e){
                 break;

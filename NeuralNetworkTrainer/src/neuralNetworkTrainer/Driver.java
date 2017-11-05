@@ -16,7 +16,7 @@ class Driver {
 	/**
 	 * The data set
 	 */
-	private static Data dataset;
+	public static Data dataset;
 
 	/**
 	 * The training algorithm to use
