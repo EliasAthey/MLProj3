@@ -30,7 +30,7 @@ class Driver {
 	/**
 	 * True if the current problem is a classification problem; false if it is a linear regression problem
 	 */
-	static boolean isClassificationNetwork;
+	static boolean isClassificationNetwork = true;
 
 	/**
 	 * Backprop parameters

@@ -1,6 +1,8 @@
 package neuralNetworkTrainer;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Dictionary;
 
 /**
  * A parent class for all data classes
@@ -45,4 +47,9 @@ public abstract class Data {
     public int getNumOutputs() {
         return numOutputs;
     }
+
+    /**
+     * Maps class labels to their respective integer values in the data
+     */
+    public ArrayList<String> classLabels;
 }
