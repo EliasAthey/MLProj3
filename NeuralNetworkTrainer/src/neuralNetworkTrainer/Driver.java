@@ -176,10 +176,6 @@ class Driver {
 				Driver.dataset = new MachineData();
 				Driver.isClassificationNetwork = false;
 				break;
-			case "flare":
-				Driver.dataset = new FlareData();
-				Driver.isClassificationNetwork = true;
-				break;
 			case "tictactoe":
 				Driver.dataset = new TTTData();
 				Driver.isClassificationNetwork = true;
@@ -249,7 +245,6 @@ class Driver {
 	private static void displayHelpText(){
 		System.out.println("usage:   java -jar NeuralNetworkTrainer.jar <datafile> <training-algorithm> <hidden-layers> [parameters]");
 		System.out.println("\n<datafile>:                machine");
-		System.out.println("                           flare");
 		System.out.println("                           tictactoe");
 		System.out.println("                           glass");
 		System.out.println("\n<training-algorithm>:      bp (backprop)");
