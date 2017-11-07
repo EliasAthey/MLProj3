@@ -244,13 +244,13 @@ class Driver {
 	 */
 	private static void displayHelpText(){
 		System.out.println("usage:   java -jar NeuralNetworkTrainer.jar <datafile> <training-algorithm> <hidden-layers> [parameters]");
-		System.out.println("\n<datafile>:                machine");
-		System.out.println("                           tictactoe");
+		System.out.println("\n<datafile>:                flare");
 		System.out.println("                           glass");
+		System.out.println("                           tictactoe");
 		System.out.println("\n<training-algorithm>:      bp (backprop)");
-		System.out.println("                           ga (genetic algorithm)");
-		System.out.println("                           es (evolution strategy)");
 		System.out.println("                           de (differential evolution)");
+		System.out.println("                           es (evolution strategy)");
+		System.out.println("                           ga (genetic algorithm)");
 		System.out.println("\n<hidden-layers>:   a[-b]*");
 		System.out.println("                           a,b... are positive integers representing the number of nodes in each respective hidden layer");
 		System.out.println("                           leftmost value is the first hidden layer, rightmost is the last");
