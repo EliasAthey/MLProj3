@@ -172,10 +172,6 @@ class Driver {
 	private static boolean setDataFile(String input){
 		boolean flag = true;
 		switch(input){
-			case "machine":
-				Driver.dataset = new MachineData();
-				Driver.isClassificationNetwork = false;
-				break;
 			case "flare":
 				Driver.dataset = new FlareData();
 				Driver.isClassificationNetwork = true;
