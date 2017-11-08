@@ -110,16 +110,16 @@ class Backprop extends TrainingAlgorithm {
 					weight = weight / numWeights;
 				}
 			}
-			
+			ArrayList<ArrayList<Double>> originalWeights = Network.serializeNetwork(network, false);
+
 			// check convergence
-			if(!this.hasConverged(network)){
-				ArrayList<ArrayList<Double>> originalWieghts = Network.serializeNetwork(network, false);
-				network.setWeights(this.getChangeInWeights(averagedWeights, originalWieghts), true);
+			if(!this.hasConverged(originalWeights, averagedWeights)){
+				network.setWeights(this.getChangeInWeights(averagedWeights, originalWeights), true);
 				network.setWeights(averagedWeights, false);
 
 //				// print previous weights
 //				System.out.println("Previous Weights");
-//				for(ArrayList<Double> node : originalWieghts){
+//				for(ArrayList<Double> node : originalWeights){
 //					System.out.print("Node: ");
 //					for(Double weight : node){
 //						System.out.print(weight + " ");
@@ -195,14 +195,22 @@ class Backprop extends TrainingAlgorithm {
 	
 	/**
 	 * Determines if the given network's weights have converged
-	 * @param network the network to check
+	 * @param originalWeights the last iteration's weights
+	 * @param currentWeights the current iteration's weights
 	 * @return true if the network has converged
 	 */
-	private boolean hasConverged(Network network){
-		/**
-		 * TODO
-		 */
-		return false;
+	private boolean hasConverged(ArrayList<ArrayList<Double>> originalWeights, ArrayList<ArrayList<Double>> currentWeights){
+
+		for(int i = 0; i < originalWeights.size(); i++){
+			for(int j = 0; j < originalWeights.get(i).size(); j++){
+				double difference = originalWeights.get(i).get(j) - currentWeights.get(i).get(j);
+				int estimate = (int)(difference * 1000);
+				if(estimate != 0){
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 	
 	/**

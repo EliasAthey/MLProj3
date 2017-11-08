@@ -152,6 +152,7 @@ class Driver {
 			}
 			System.out.println("Starting training...\n");
 			Driver.train();
+			System.out.println("Training Complete\n");
 		}
 	}
 	
