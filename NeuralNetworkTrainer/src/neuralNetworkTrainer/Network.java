@@ -48,8 +48,10 @@ class  Network implements Comparable {
 		// create output layer, these nodes use linear function for regression problem and sigmoidal for classification; they have no downstream nodes
 		for(int nodeIter = 0; nodeIter < Driver.configuration.get(Driver.configuration.size() - 1); nodeIter++){
 			if(Driver.isClassificationNetwork){
-				this.outputLayer.getNodes().add(nodeIter, new Node(new SigmoidalFunction(), new ArrayList<Node>(), nodeIter));
+//				this.outputLayer.getNodes().add(nodeIter, new Node(new SigmoidalFunction(), new ArrayList<Node>(), nodeIter));
+				this.outputLayer.getNodes().add(nodeIter, new Node(new LinearFunction(), new ArrayList<Node>(), nodeIter));
 			}
+
 			else{
 				this.outputLayer.getNodes().add(nodeIter, new Node(new LinearFunction(), new ArrayList<Node>(), nodeIter));
 			}
@@ -58,7 +60,7 @@ class  Network implements Comparable {
 				ArrayList<Double> weightChangeVector = new ArrayList<>();
 				for(int weightIter = 0; weightIter < Driver.configuration.get(Driver.configuration.size() - 2); weightIter++){
 					weightVector.add(weightIter, Math.pow(-1, (int)(Math.random() * 2)) * Math.random() * 0.5);
-					weightChangeVector.add(0, 0.0);
+					weightChangeVector.add(weightIter, 0.0);
 				}
 				weights.add(weightVector);
 				weightChange.add(weightChangeVector);
@@ -82,7 +84,7 @@ class  Network implements Comparable {
 					ArrayList<Double> weightChangeVector = new ArrayList<>();
 					for(int weightIter = 0; weightIter < Driver.configuration.get(layerIter - 1); weightIter++){
 						weightVector.add(weightIter, Math.pow(-1, (int)(Math.random() * 2)) * Math.random() * 0.5);
-						weightChangeVector.add(0, 0.0);
+						weightChangeVector.add(weightIter, 0.0);
 					}
 					weights.add(nodeIter, weightVector);
 					weightChange.add(nodeIter, weightChangeVector);

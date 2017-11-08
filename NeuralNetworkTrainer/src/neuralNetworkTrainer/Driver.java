@@ -152,6 +152,7 @@ class Driver {
 			}
 			System.out.println("Starting training...\n");
 			Driver.train();
+			System.out.println("Training Complete\n");
 		}
 	}
 	
@@ -172,16 +173,24 @@ class Driver {
 	private static boolean setDataFile(String input){
 		boolean flag = true;
 		switch(input){
-			case "flare":
-				Driver.dataset = new FlareData();
-				Driver.isClassificationNetwork = true;
-				break;
 			case "tictactoe":
 				Driver.dataset = new TTTData();
 				Driver.isClassificationNetwork = true;
 				break;
 			case "glass":
 				Driver.dataset = new GlassData();
+				Driver.isClassificationNetwork = true;
+				break;
+			case "ionosphere":
+				Driver.dataset = new IonData();
+				Driver.isClassificationNetwork = true;
+				break;
+			case "letter":
+				Driver.dataset = new LetterRecogData();
+				Driver.isClassificationNetwork = true;
+				break;
+			case "waveform":
+				Driver.dataset = new WaveformData();
 				Driver.isClassificationNetwork = true;
 				break;
 			default:
@@ -244,21 +253,22 @@ class Driver {
 	 */
 	private static void displayHelpText(){
 		System.out.println("usage:   java -jar NeuralNetworkTrainer.jar <datafile> <training-algorithm> <hidden-layers> [parameters]");
-		System.out.println("\n<datafile>:                machine");
-		System.out.println("                           flare");
+		System.out.println("\n<datafile>:                glass");
+		System.out.println("                           ionosphere");
+		System.out.println("                           letter");
 		System.out.println("                           tictactoe");
-		System.out.println("                           glass");
+		System.out.println("                           waveform");
 		System.out.println("\n<training-algorithm>:      bp (backprop)");
 		System.out.println("                           ga (genetic algorithm)");
 		System.out.println("                           es (evolution strategy)");
 		System.out.println("                           de (differential evolution)");
-		System.out.println("\n<hidden-layers>:   a[-b]*");
+		System.out.println("\n<hidden-layers>:           a[-b]*");
 		System.out.println("                           a,b... are positive integers representing the number of nodes in each respective hidden layer");
 		System.out.println("                           leftmost value is the first hidden layer, rightmost is the last");
 		System.out.println("                           examples:   0 is the network with no hidden layer");
 		System.out.println("                                       10 is the network with one layer of 10 hidden nodes");
 		System.out.println("                                       20-10 is the network with two hidden layers; first has 20 nodes, second has 10 nodes");
-		System.out.println("\nparameters:   [-c][-lr <learning rate>][-m <momentum>][-p <population-size>]");
+		System.out.println("\nparameters:     [-lr <learning rate>][-m <momentum>][-p <population-size>]");
 		System.out.println("                [-o <offspring-size>][-mr <mutation rate>][-b <beta>]");
 		System.out.println("\n-lr   defines the LEARNING RATE used by backprop");
 		System.out.println("-m    defines the MOMENTUM used by backprop");
