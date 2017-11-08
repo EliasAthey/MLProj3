@@ -78,26 +78,13 @@ public class EvolutionStrategy extends TrainingAlgorithm {
 		return null;
 	}
 
-	// calls the correct fitness evaluation measure
+	// evaluated the fitness of the population
 	private ArrayList<Network> evalFitness(ArrayList<Network> population) {
 		ArrayList<Network> fitPop = null;
-		if (Driver.isClassificationNetwork) {
-			fitPop = evalClasificationFitness(population);
-		} else {
-			fitPop = evalFunApproxFitness(population);
-		}
+		//TODO
 		return fitPop;
 	}
 
-	private ArrayList<Network> evalFunApproxFitness(ArrayList<Network> population) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	private ArrayList<Network> evalClasificationFitness(ArrayList<Network> population) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	public Boolean hasConverged(ArrayList<Network> currentPopulation, ArrayList<Network> prevPopulation) {
 		// TODO
