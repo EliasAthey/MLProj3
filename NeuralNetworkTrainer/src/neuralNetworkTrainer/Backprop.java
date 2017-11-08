@@ -29,8 +29,7 @@ class Backprop extends TrainingAlgorithm {
 		
 		// do until convergence
 		while(true){
-			
-			// holds the last computed output
+
 			ArrayList<Object> computedOutput;
 			
 			// holds the last expected output
