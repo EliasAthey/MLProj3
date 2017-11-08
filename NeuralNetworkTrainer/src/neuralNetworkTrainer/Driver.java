@@ -55,10 +55,6 @@ class Driver {
 	 */
 	public static void main(String[] args) {
 
-		System.out.println((int)'A');
-		System.out.println((int)'B');
-
-
 		// Check for three required parameters
 		if(args.length < 3){
 			Driver.displayHelpText();
@@ -184,6 +180,18 @@ class Driver {
 				Driver.dataset = new GlassData();
 				Driver.isClassificationNetwork = true;
 				break;
+			case "ionosphere":
+				Driver.dataset = new IonData();
+				Driver.isClassificationNetwork = true;
+				break;
+			case "letter":
+				Driver.dataset = new LetterRecogData();
+				Driver.isClassificationNetwork = true;
+				break;
+			case "waveform":
+				Driver.dataset = new WaveformData();
+				Driver.isClassificationNetwork = true;
+				break;
 			default:
 				System.out.println(input + "is not a valid datafile.\n");
 				flag = false;
@@ -244,10 +252,11 @@ class Driver {
 	 */
 	private static void displayHelpText(){
 		System.out.println("usage:   java -jar NeuralNetworkTrainer.jar <datafile> <training-algorithm> <hidden-layers> [parameters]");
-		System.out.println("\n<datafile>:                machine");
-		System.out.println("                           flare");
+		System.out.println("\n<datafile>:                glass");
+		System.out.println("                           ionosphere");
+		System.out.println("                           letter (letter recognition)");
 		System.out.println("                           tictactoe");
-		System.out.println("                           glass");
+		System.out.println("                           waveform");
 		System.out.println("\n<training-algorithm>:      bp (backprop)");
 		System.out.println("                           ga (genetic algorithm)");
 		System.out.println("                           es (evolution strategy)");

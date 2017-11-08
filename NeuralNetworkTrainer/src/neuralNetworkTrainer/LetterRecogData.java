@@ -26,7 +26,7 @@ public class LetterRecogData extends Data{
                 String line = fileScanner.nextLine();
                 String[] entries = line.split(",");
                 ArrayList<Object> values = new ArrayList<>();
-                int classValue = (int)entries[0].charAt(0) - 65; // this maps A to 0, B to 1, etc
+                double classValue = (int)entries[0].charAt(0) - 65; // this maps A to 0, B to 1, etc
                 for(int entryIter = 1; entryIter < entries.length; entryIter++){
                     values.add(Integer.parseInt(entries[entryIter]));
                 }

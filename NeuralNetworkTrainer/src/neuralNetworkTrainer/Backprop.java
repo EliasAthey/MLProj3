@@ -1,6 +1,5 @@
 package neuralNetworkTrainer;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -140,11 +139,8 @@ class Backprop extends TrainingAlgorithm {
 //				}
 				
 				// print error
-				ArrayList<Double> averagedErrors = this.getAveragedSquareError(errors);
-				for(int i = 0; i < averagedErrors.size(); i++){
-					System.out.println("Average squared error for output node " + i + ": " + averagedErrors.get(i) + "");
-				}
-				System.out.println();
+				Double percentError = this.getPercentError(errors);
+				System.out.println("Percent error: " + percentError + "\n");
 				errors.clear();
 			}
 			else{
@@ -225,7 +221,7 @@ class Backprop extends TrainingAlgorithm {
 					largestValuedOutputIndex = outputIter;
 				}
 				if(outputIter == computedOutput.size() - 1){
-					if(largestValuedOutputIndex == (int)expectedOutput.get(0)){
+					if(largestValuedOutputIndex == (double)expectedOutput.get(0)){
 						error.add(0, 0.0);
 					}
 					else{
@@ -253,18 +249,15 @@ class Backprop extends TrainingAlgorithm {
 	 * @param allErrors the list of all squared errors
 	 * @return the average squared error
 	 */
-	private ArrayList<Double> getAveragedSquareError(ArrayList<ArrayList<Double>> allErrors){
+	private Double getPercentError(ArrayList<ArrayList<Double>> allErrors){
 
 		double[] sums = new double[allErrors.get(0).size()];
 		for(int errorIter = 0; errorIter < allErrors.size(); errorIter++){
 			for(int i = 0; i < allErrors.get(errorIter).size(); i++){
-				sums[i] += Math.pow(allErrors.get(errorIter).get(i), 2);
+				sums[i] += allErrors.get(errorIter).get(i); // not squared
 			}
 		}
-		ArrayList<Double> averageError = new ArrayList<>();
-		for(int sumIter = 0; sumIter < sums.length; sumIter++){
-			averageError.add(sums[sumIter] / allErrors.size());
-		}
+		Double averageError = sums[0] / allErrors.size();
 		return averageError;
 	}
 	
@@ -281,7 +274,7 @@ class Backprop extends TrainingAlgorithm {
 				if(errors.get(0) == 1.0){
 					outputNode.setBackpropDelta((Double)outputNode.getDerivative());
 				}
-				else if(outputNode.getIndexInLayer() == (int)expectedOutput.get(0)){
+				else if(outputNode.getIndexInLayer() == (double)expectedOutput.get(0)){
 					outputNode.setBackpropDelta((1.0 - (double)outputNode.getComputedOutput()) * (Double)outputNode.getDerivative());
 				}
 				else{
