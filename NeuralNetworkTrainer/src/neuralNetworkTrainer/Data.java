@@ -45,4 +45,22 @@ public abstract class Data {
     public int getNumOutputs() {
         return numOutputs;
     }
+
+
+    /**
+     * Gets a subset of the data used for evaluation
+     * @param size size of eval network, if 0 it defaults to 10% the size of the whole dataset
+     * @return data to be used in fitness evaluation
+     */
+    public ArrayList<ArrayList<Object>> getEvalDataSet(int size){
+        ArrayList<ArrayList<Object>> evalSet = new ArrayList<>();
+        if (size == 0){
+            size = dataPoints.size() / 10;
+        }
+        for (int dataIter = 0; dataIter < size; dataIter++) {
+            evalSet.add(dataPoints.get((int) (Math.random() * size)));
+        }
+        return evalSet;
+
+    }
 }
