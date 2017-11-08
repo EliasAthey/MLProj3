@@ -30,10 +30,10 @@ public class IonData extends Data {
                     values.add(Double.parseDouble(entries[entryIter]));
                 }
                 if(entries[entries.length - 1].equals("g")){
-                    values.add(1);
+                    values.add(1.0);
                 }
                 else if(entries[entries.length - 1].equals("b")){
-                    values.add(0);
+                    values.add(0.0);
                 }
                 else{
                     System.out.println("Error parsing ionosphere.data");
