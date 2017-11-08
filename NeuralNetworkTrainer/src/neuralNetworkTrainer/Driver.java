@@ -55,6 +55,10 @@ class Driver {
 	 */
 	public static void main(String[] args) {
 
+		System.out.println((int)'A');
+		System.out.println((int)'B');
+
+
 		// Check for three required parameters
 		if(args.length < 3){
 			Driver.displayHelpText();
