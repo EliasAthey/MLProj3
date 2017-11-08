@@ -11,7 +11,7 @@ public class TTTData extends Data{
      */
     TTTData(){
         numInputs = 9;
-        numOutputs = 1;
+        numOutputs = 2;
         dataPoints = new ArrayList<>();
         this.setDataPoints();
     }
@@ -29,10 +29,11 @@ public class TTTData extends Data{
                 for(int entryIter = 0; entryIter < entries.length; entryIter++){
                     switch(entries[entryIter]){
                         case "x": values.add(-1); break;
-                        case "o": values.add(0); break;
-                        case "b": values.add(1); break;
-                        case "positive": values.add(1); break;
-                        case "negative": values.add(-1); break;
+                        case "b": values.add(0); break;
+                        case "o": values.add(1); break;
+                        case "positive": values.add(0); break;
+                        case "negative": values.add(1); break;
+                        default: System.out.println("Error in reading tic-tac-toe.data"); System.exit(0);
                     }
                 }
                 dataPoints.add(values);

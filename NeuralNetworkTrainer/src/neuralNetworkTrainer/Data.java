@@ -18,7 +18,7 @@ public abstract class Data {
     protected int numInputs;
 
     /**
-     * Number of outputs of the data
+     * Number of outputs/classes of the data
      */
     protected int numOutputs;
 

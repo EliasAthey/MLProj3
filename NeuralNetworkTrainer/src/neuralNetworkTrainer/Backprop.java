@@ -1,5 +1,6 @@
 package neuralNetworkTrainer;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -40,7 +41,7 @@ class Backprop extends TrainingAlgorithm {
 			ArrayList<ArrayList<ArrayList<Double>>> allWeights = new ArrayList<>();
 
 			// all the squared errors, used to find average
-			ArrayList<ArrayList<Double>> squaredErrors = new ArrayList<>();
+			ArrayList<ArrayList<Double>> errors = new ArrayList<>();
 			
 			// get sample data set
 			int numInputs = Driver.dataset.getNumInputs();
@@ -54,7 +55,7 @@ class Backprop extends TrainingAlgorithm {
 				network.clearInputs();
 				expectedOutput.clear();
 				for(int inputIter = 0; inputIter < samplePoint.size(); inputIter++){
-					if(inputIter < samplePoint.size() - Driver.dataset.getNumOutputs()){
+					if(inputIter < samplePoint.size() - 1){ // this assumes the data has 1 output value (the class)
 						network.getInputLayer().getNodes().get(inputIter).getInputs().add(samplePoint.get(inputIter));
 					}
 					else{
@@ -66,13 +67,14 @@ class Backprop extends TrainingAlgorithm {
 				computedOutput = this.executeNodes(network);
 
 				// add squared error to list
-				squaredErrors.add(samplePointIter, this.getSquaredError(expectedOutput, computedOutput));
+				ArrayList<Double> currentError = this.getError(expectedOutput, computedOutput);
+				errors.add(samplePointIter, currentError);
 				
 				// Save original weights
 				ArrayList<ArrayList<Double>> originalWeights = (ArrayList<ArrayList<Double>>)Network.serializeNetwork(network, false).clone();
 				
 				// set delta values then update weights
-				this.setOutputDeltas(network, expectedOutput);
+				this.setOutputDeltas(network, expectedOutput, currentError);
 				this.setHiddenDeltas(network);
 				this.updateFinalNodeWeights(network);
 				this.updateHiddenNodeWeights(network);
@@ -138,12 +140,12 @@ class Backprop extends TrainingAlgorithm {
 //				}
 				
 				// print error
-				ArrayList<Double> averagedErrors = this.getAveragedSquareError(squaredErrors);
+				ArrayList<Double> averagedErrors = this.getAveragedSquareError(errors);
 				for(int i = 0; i < averagedErrors.size(); i++){
 					System.out.println("Average squared error for output node " + i + ": " + averagedErrors.get(i) + "");
 				}
 				System.out.println();
-				squaredErrors.clear();
+				errors.clear();
 			}
 			else{
 				// break out of while loop if we have converged
@@ -213,22 +215,37 @@ class Backprop extends TrainingAlgorithm {
 	 * @param expectedOutput the output defined by the sample
 	 * @return the squared error between the network's computed output and the sample expected output
 	 */
-	private ArrayList<Double> getSquaredError(ArrayList<Object> expectedOutput, ArrayList<Object> computedOutput){
-		
-		ArrayList<Double> squaredError = new ArrayList<>();
-		for(int outputIter = 0; outputIter < expectedOutput.size(); outputIter++){
-			double expected = 0;
-			if(expectedOutput.get(outputIter).getClass().getTypeName().equals("java.lang.Double")){
-				expected = (double)expectedOutput.get(outputIter);
+	private ArrayList<Double> getError(ArrayList<Object> expectedOutput, ArrayList<Object> computedOutput){
+
+		ArrayList<Double> error = new ArrayList<>();
+		int largestValuedOutputIndex = 0;
+		for(int outputIter = 0; outputIter < computedOutput.size(); outputIter++){
+			if(Driver.isClassificationNetwork){
+				if((double)computedOutput.get(outputIter) > (double)computedOutput.get(largestValuedOutputIndex)){
+					largestValuedOutputIndex = outputIter;
+				}
+				if(outputIter == computedOutput.size() - 1){
+					if(largestValuedOutputIndex == (int)expectedOutput.get(0)){
+						error.add(0, 0.0);
+					}
+					else{
+						error.add(0, 1.0);
+					}
+				}
 			}
-			else if(expectedOutput.get(outputIter).getClass().getTypeName().equals("java.lang.Integer")){
-				expected = (int)expectedOutput.get(outputIter);
+			else{
+				double expected = 0;
+				if(expectedOutput.get(outputIter).getClass().getTypeName().equals("java.lang.Double")){
+					expected = (double)expectedOutput.get(outputIter);
+				}
+				else if(expectedOutput.get(outputIter).getClass().getTypeName().equals("java.lang.Integer")){
+					expected = (int)expectedOutput.get(outputIter);
+				}
+				double computed = (double)computedOutput.get(outputIter);
+				error.add(outputIter, expected - computed);
 			}
-			double computed = (double)computedOutput.get(outputIter);
-			Double error =  Math.pow((expected - computed), 2);
-			squaredError.add(outputIter, error);
 		}
-		return squaredError;
+		return error;
 	}
 
 	/**
@@ -241,7 +258,7 @@ class Backprop extends TrainingAlgorithm {
 		double[] sums = new double[allErrors.get(0).size()];
 		for(int errorIter = 0; errorIter < allErrors.size(); errorIter++){
 			for(int i = 0; i < allErrors.get(errorIter).size(); i++){
-				sums[i] += allErrors.get(errorIter).get(i);
+				sums[i] += Math.pow(allErrors.get(errorIter).get(i), 2);
 			}
 		}
 		ArrayList<Double> averageError = new ArrayList<>();
@@ -252,23 +269,38 @@ class Backprop extends TrainingAlgorithm {
 	}
 	
 	/**
-	 * Sets the delta values for all output nodes. The derivative used is 1 because the output function is just a weighted sum.
+	 * Sets the delta values for all output nodes.
 	 * @param network the Network to reference
 	 * @param expectedOutput the expected output of the network
+	 * @param errors the computed error for this iteration
 	 */
-	private void setOutputDeltas(Network network, ArrayList<Object> expectedOutput){
-		
+	private void setOutputDeltas(Network network, ArrayList<Object> expectedOutput, ArrayList<Double> errors){
+
 		for(Node outputNode : network.getOutputLayer().getNodes()){
-			double expected = 0;
-			if(expectedOutput.get(outputNode.getIndexInLayer()).getClass().getTypeName().equals("java.lang.Double")){
-				expected = (double)expectedOutput.get(outputNode.getIndexInLayer());
+			if(Driver.isClassificationNetwork){
+				if(errors.get(0) == 1.0){
+					outputNode.setBackpropDelta((Double)outputNode.getDerivative());
+				}
+				else if(outputNode.getIndexInLayer() == (int)expectedOutput.get(0)){
+					outputNode.setBackpropDelta((1.0 - (double)outputNode.getComputedOutput()) * (Double)outputNode.getDerivative());
+				}
+				else{
+					outputNode.setBackpropDelta((0.0 - (double)outputNode.getComputedOutput()) * (Double)outputNode.getDerivative());
+				}
+
 			}
-			else if(expectedOutput.get(outputNode.getIndexInLayer()).getClass().getTypeName().equals("java.lang.Integer")){
-				expected = (int)expectedOutput.get(outputNode.getIndexInLayer());
+			else{
+				double expected = 0;
+				if(expectedOutput.get(outputNode.getIndexInLayer()).getClass().getTypeName().equals("java.lang.Double")){
+					expected = (double)expectedOutput.get(outputNode.getIndexInLayer());
+				}
+				else if(expectedOutput.get(outputNode.getIndexInLayer()).getClass().getTypeName().equals("java.lang.Integer")){
+					expected = (int)expectedOutput.get(outputNode.getIndexInLayer());
+				}
+				Double computed = (Double)outputNode.getComputedOutput();
+				Double delta = (expected - computed) * (Double)outputNode.getDerivative();
+				outputNode.setBackpropDelta(delta);
 			}
-			Double computed = (Double)outputNode.getComputedOutput();
-			Double delta = (expected - computed) * (Double)outputNode.getDerivative();
-			outputNode.setBackpropDelta(delta);
 		}
 	}
 	
