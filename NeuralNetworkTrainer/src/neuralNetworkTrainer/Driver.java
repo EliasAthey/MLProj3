@@ -172,10 +172,6 @@ class Driver {
 	private static boolean setDataFile(String input){
 		boolean flag = true;
 		switch(input){
-			case "flare":
-				Driver.dataset = new FlareData();
-				Driver.isClassificationNetwork = true;
-				break;
 			case "tictactoe":
 				Driver.dataset = new TTTData();
 				Driver.isClassificationNetwork = true;
