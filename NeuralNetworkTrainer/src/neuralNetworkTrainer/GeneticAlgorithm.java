@@ -178,29 +178,11 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		return offspring;
 	}
 
-	//calls the correct fitness evaluation measure
-	private ArrayList<Network> evalFitness(ArrayList<Network> population) {
-		ArrayList<Network> fitPop = null;
-		if (Driver.isClassificationNetwork) {
-			fitPop = evalClasificationFitness(population);
-		}
-		else {
-			fitPop = evalFunApproxFitness(population);
-		}
-		return fitPop;
-	}
-	
-
-	private ArrayList<Network> evalFunApproxFitness(ArrayList<Network> population) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	//classification
 	//TODO:
 	//need to be able to run a single data point through the network in Network.evaluate(datapoint) method
 	//need a set of evaluation data
-	public ArrayList<Network> evalClasificationFitness(ArrayList<Network> population){
+	public ArrayList<Network> evalFitness(ArrayList<Network> population){
 		//evalutaion set of data == eval
 		ArrayList<ArrayList<Double>> eval = new ArrayList<ArrayList<Double>>();
 		
