@@ -28,7 +28,7 @@ public class LetterRecogData extends Data{
                 ArrayList<Object> values = new ArrayList<>();
                 double classValue = (int)entries[0].charAt(0) - 65; // this maps A to 0, B to 1, etc
                 for(int entryIter = 1; entryIter < entries.length; entryIter++){
-                    values.add(Integer.parseInt(entries[entryIter]));
+                    values.add(Double.parseDouble(entries[entryIter]));
                 }
                 values.add(classValue);
                 dataPoints.add(values);

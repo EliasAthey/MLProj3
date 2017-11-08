@@ -271,16 +271,21 @@ class Backprop extends TrainingAlgorithm {
 
 		for(Node outputNode : network.getOutputLayer().getNodes()){
 			if(Driver.isClassificationNetwork){
-				if(errors.get(0) == 1.0){
-					outputNode.setBackpropDelta((Double)outputNode.getDerivative());
-				}
-				else if(outputNode.getIndexInLayer() == (double)expectedOutput.get(0)){
+//				if(errors.get(0) == 1.0){
+//					outputNode.setBackpropDelta((Double)outputNode.getDerivative());
+//				}
+//				else if(outputNode.getIndexInLayer() == (double)expectedOutput.get(0)){
+//					outputNode.setBackpropDelta((1.0 - (double)outputNode.getComputedOutput()) * (Double)outputNode.getDerivative());
+//				}
+//				else{
+//					outputNode.setBackpropDelta((0.0 - (double)outputNode.getComputedOutput()) * (Double)outputNode.getDerivative());
+//				}
+				if(outputNode.getIndexInLayer() == (double)expectedOutput.get(0)){
 					outputNode.setBackpropDelta((1.0 - (double)outputNode.getComputedOutput()) * (Double)outputNode.getDerivative());
 				}
 				else{
 					outputNode.setBackpropDelta((0.0 - (double)outputNode.getComputedOutput()) * (Double)outputNode.getDerivative());
 				}
-
 			}
 			else{
 				double expected = 0;
