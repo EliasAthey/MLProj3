@@ -17,7 +17,7 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 
 			// adding a global config in driver might be worth doing
 			// or passing config through train() to all these methods
-			Network individual = new Network(Driver.configuration);
+			Network individual = new Network(true);
 			population.add(individual);
 		}
 		return population;
@@ -30,7 +30,7 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 		ArrayList<Network> deserializedPopulation = new ArrayList<Network>();
 		
 		for (ArrayList<ArrayList<Double>> individual : population) {
-			deserializedPopulation.add(Network.deserializeToNetwork(Driver.configuration, individual));
+			deserializedPopulation.add(Network.deserializeToNetwork( individual));
 		}
 		
 		return deserializedPopulation;
@@ -41,7 +41,7 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 		ArrayList<ArrayList<ArrayList<Double>>> serializedPopulation = new ArrayList<ArrayList<ArrayList<Double>>>();
 		
 		for (Network individual : population) {
-			serializedPopulation.add(Network.serializeNetwork(individual));
+			serializedPopulation.add(Network.serializeNetwork(individual, false));
 		}
 		
 		return serializedPopulation;

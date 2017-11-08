@@ -3,7 +3,6 @@
  */
 package neuralNetworkTrainer;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.regex.Pattern;
@@ -15,9 +14,9 @@ import java.util.regex.Pattern;
 class Driver {
 
 	/**
-	 * The file for the data set
+	 * The data set
 	 */
-	private static File dataFile;
+	public static Data dataset;
 
 	/**
 	 * The training algorithm to use
@@ -72,7 +71,6 @@ class Driver {
 			}
 
 			// set default values for all optional parameters
-			Driver.isClassificationNetwork = false;
 			Driver.learningRate = 0.01;
 			Driver.momentum = 0.5;
 			Driver.populationSize = 32;
@@ -85,10 +83,6 @@ class Driver {
 			for(int argIter = 3; argIter < args.length; argIter++){
 				if(dashPattern.matcher(args[argIter]).matches()){
 					switch(args[argIter]){
-						// is classification network?
-						case "-c":
-							Driver.isClassificationNetwork = true;
-							break;
 						// learning rate
 						case "-lr":
 							if(argIter + 1 < args.length && Pattern.matches("\\d+\\.\\d+", args[argIter + 1])){
@@ -176,12 +170,25 @@ class Driver {
 	 * @return true if the operation is successful, false otherwise
 	 */
 	private static boolean setDataFile(String input){
-		Driver.dataFile = new File(input);
-		if(!dataFile.exists()){
-			System.out.println("The file does not exist, try again.\n");
-			return false;
+		boolean flag = true;
+		switch(input){
+			case "flare":
+				Driver.dataset = new FlareData();
+				Driver.isClassificationNetwork = true;
+				break;
+			case "tictactoe":
+				Driver.dataset = new TTTData();
+				Driver.isClassificationNetwork = true;
+				break;
+			case "glass":
+				Driver.dataset = new GlassData();
+				Driver.isClassificationNetwork = true;
+				break;
+			default:
+				System.out.println(input + "is not a valid datafile.\n");
+				flag = false;
 		}
-		return true;
+		return flag;
 	}
 
 	/**
@@ -192,20 +199,20 @@ class Driver {
 	private static boolean setTrainingAlgorithm(String input){
 		boolean flag = true;
 		switch(input){
-			case "-bp":
+			case "bp":
 				Driver.trainingAlgorithm = new Backprop();
 				break;
-			case "-ga":
-				//Driver.trainingAlgorithm = new GA();
+			case "ga":
+				Driver.trainingAlgorithm = new GeneticAlgorithm();
 				break;
-			case "-es":
-				//Driver.trainingAlgorithm = new ES();
+			case "es":
+				Driver.trainingAlgorithm = new EvolutionStrategy();
 				break;
-			case "-de":
-				//Driver.trainingAlgorithm = new DE();
+			case "de":
+				Driver.trainingAlgorithm = new DifferentialEvolution();
 				break;
 			default:
-				System.out.println("The training algorithm is wrong, try again.\n");
+				System.out.println(input + " is not a valid training algorithm.\n");
 				flag = false;
 		}
 		return flag;
@@ -213,19 +220,21 @@ class Driver {
 
 	/**
 	 * Splits the input string into an ArrayList of Integers and passes it to the Network constructor
-	 * @param input the network configuration
+	 * @param input the network hidden layer configuration; inputs and outputs defined by data set
 	 * @return true if successful, false otherwise
 	 */
 	private static boolean configureNetwork(String input){
-		if(Pattern.matches("\\d+-\\d+(-\\d+)*", input)){
+		if(Pattern.matches("\\d+(-\\d+)*", input)){
 			String[] layers = input.split("-");
+			Driver.configuration.add(Driver.dataset.numInputs);
 			for(String layerSize : layers){
 				Driver.configuration.add(Integer.parseInt(layerSize));
 			}
+			Driver.configuration.add(Driver.dataset.numOutputs);
 			return true;
 		}
 		else{
-			System.out.println("The network configuration is wrong, try again.\n");
+			System.out.println(input + " is an invalid hidden layer configuration.\n");
 			return false;
 		}
 	}
@@ -234,22 +243,24 @@ class Driver {
 	 * Displays the help text for the program
 	 */
 	private static void displayHelpText(){
-		System.out.println("usage:   java -jar NeuralNetworkTrainer.jar <datafile> <training-algorithm> <network-configuration> [parameters]");
-		System.out.println("\n<datafile>:              path to file containing a data set");
-		System.out.println("\n<training-algorithm>:      -bp (backprop)");
-		System.out.println("                           -ga (genetic algorithm)");
-		System.out.println("                           -es (evolution strategy)");
-		System.out.println("                           -de (differential evolution)");
-		System.out.println("\n<network-configuration>:   a-b[-c]*");
-		System.out.println("                           a,b,c,... are positive integers representing the number of nodes in each respective layer");
-		System.out.println("                           the leftmost value is the input layer, the rightmost is the output layer, any values in between are hidden layers");
-		System.out.println("                           any network must have at least 2 layers (input and output)");
-		System.out.println("                           examples:   3-1 is the network with 3 input nodes and 1 output node, no hidden nodes");
-		System.out.println("                                       3-20-1 is the network with 3 input nodes, 20 hidden nodes, and 1 output node");
+		System.out.println("usage:   java -jar NeuralNetworkTrainer.jar <datafile> <training-algorithm> <hidden-layers> [parameters]");
+		System.out.println("\n<datafile>:                machine");
+		System.out.println("                           flare");
+		System.out.println("                           tictactoe");
+		System.out.println("                           glass");
+		System.out.println("\n<training-algorithm>:      bp (backprop)");
+		System.out.println("                           ga (genetic algorithm)");
+		System.out.println("                           es (evolution strategy)");
+		System.out.println("                           de (differential evolution)");
+		System.out.println("\n<hidden-layers>:   a[-b]*");
+		System.out.println("                           a,b... are positive integers representing the number of nodes in each respective hidden layer");
+		System.out.println("                           leftmost value is the first hidden layer, rightmost is the last");
+		System.out.println("                           examples:   0 is the network with no hidden layer");
+		System.out.println("                                       10 is the network with one layer of 10 hidden nodes");
+		System.out.println("                                       20-10 is the network with two hidden layers; first has 20 nodes, second has 10 nodes");
 		System.out.println("\nparameters:   [-c][-lr <learning rate>][-m <momentum>][-p <population-size>]");
 		System.out.println("                [-o <offspring-size>][-mr <mutation rate>][-b <beta>]");
-		System.out.println("\n-c    defines  a  CLASSIFICATION problem, assumes linear regression otherwise");
-		System.out.println("-lr   defines the LEARNING RATE used by backprop");
+		System.out.println("\n-lr   defines the LEARNING RATE used by backprop");
 		System.out.println("-m    defines the MOMENTUM used by backprop");
 		System.out.println("-p    defines the POPULATION SIZE used by evolutionary algorithms");
 		System.out.println("-o    defines the OFFSPRING SIZE used by evolutionary algorithms");

@@ -18,7 +18,7 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		//create populationSize number of individuals and add them to population
 		for(int popIter = 0;  popIter < Driver.populationSize; popIter++) {
 			
-			Network individual = new Network(Driver.configuration);
+			Network individual = new Network(true);
 			population.add(individual);
 		}
 		this.rouletteWheel = genWheel();
@@ -60,7 +60,7 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		ArrayList<Network> deserializedPopulation = new ArrayList<Network>();
 		
 		for (ArrayList<ArrayList<Double>> individual : population) {
-			deserializedPopulation.add(Network.deserializeToNetwork(Driver.configuration, individual));
+			deserializedPopulation.add(Network.deserializeToNetwork( individual));
 		}
 		
 		return deserializedPopulation;
@@ -71,7 +71,7 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		ArrayList<ArrayList<ArrayList<Double>>> serializedPopulation = new ArrayList<ArrayList<ArrayList<Double>>>();
 		
 		for (Network individual : population) {
-			serializedPopulation.add(Network.serializeNetwork(individual));
+			serializedPopulation.add(Network.serializeNetwork(individual, false));
 		}
 		
 		return serializedPopulation;

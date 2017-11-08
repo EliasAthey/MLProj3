@@ -34,39 +34,80 @@ class  Network implements Comparable {
 	private double fitness;
 
 	/**
-	 * Constructs a network given a configuration
-	 * 
-	 * @param configuration each number represents the number of nodes in the layer, first index is associated to the input layer, last index is the ouptut layer.
+	 * Constructs a network based off the configuration in the Driver
 	 */
-	Network(ArrayList<Integer> configuration){
+	Network(boolean setRandomWeights){
 		
 		this.inputLayer = new Layer();
-		this.hiddenLayers = new ArrayList<Layer>();
+		this.hiddenLayers = new ArrayList<>();
 		this.outputLayer = new Layer();
+
+		ArrayList<ArrayList<Double>> weights = new ArrayList<>();
+		ArrayList<ArrayList<Double>> weightChange = new ArrayList<>();
 		
-		// create output layer, these nodes use linear function and have no downstream nodes
-		for(int nodeIter = 0; nodeIter < configuration.get(configuration.size() - 1); nodeIter++){
-			this.outputLayer.getNodes().add(nodeIter, new Node(new LinearFunction(), new ArrayList<Node>(), nodeIter));
+		// create output layer, these nodes use linear function for regression problem and sigmoidal for classification; they have no downstream nodes
+		for(int nodeIter = 0; nodeIter < Driver.configuration.get(Driver.configuration.size() - 1); nodeIter++){
+			if(Driver.isClassificationNetwork){
+				this.outputLayer.getNodes().add(nodeIter, new Node(new SigmoidalFunction(), new ArrayList<Node>(), nodeIter));
+			}
+			else{
+				this.outputLayer.getNodes().add(nodeIter, new Node(new LinearFunction(), new ArrayList<Node>(), nodeIter));
+			}
+			if(setRandomWeights){
+				ArrayList<Double> weightVector = new ArrayList<>();
+				ArrayList<Double> weightChangeVector = new ArrayList<>();
+				for(int weightIter = 0; weightIter < Driver.configuration.get(Driver.configuration.size() - 2); weightIter++){
+					weightVector.add(weightIter, Math.pow(-1, (int)(Math.random() * 2)) * Math.random() * 0.5);
+					weightChangeVector.add(0, 0.0);
+				}
+				weights.add(weightVector);
+				weightChange.add(weightChangeVector);
+			}
 		}
 		
 		// create hidden layers in reverse, starting at the second to last index of configuration
 		ArrayList<Node> downstreamNodes = this.outputLayer.getNodes();
-		for(int layerIter = configuration.size() - 2; layerIter > 0; layerIter--){
+		for(int layerIter = Driver.configuration.size() - 2; layerIter > 0; layerIter--){
 			this.hiddenLayers.add(new Layer());
 		}
-		for(int layerIter = configuration.size() - 2; layerIter > 0; layerIter--){
-			
+		for(int layerIter = Driver.configuration.size() - 2; layerIter > 0; layerIter--){
+
 			// create hidden nodes for this layer, these nodes use sigmoidal function
-			for(int nodeIter = 0; nodeIter < configuration.get(layerIter); nodeIter++){
+			for(int nodeIter = 0; nodeIter < Driver.configuration.get(layerIter); nodeIter++){
 				this.hiddenLayers.get(layerIter - 1).getNodes().add(nodeIter, new Node(new SigmoidalFunction(), downstreamNodes, nodeIter));
+
+				// set hidden weights between -0.5 and +0.5
+				if(setRandomWeights){
+					ArrayList<Double> weightVector = new ArrayList<>();
+					ArrayList<Double> weightChangeVector = new ArrayList<>();
+					for(int weightIter = 0; weightIter < Driver.configuration.get(layerIter - 1); weightIter++){
+						weightVector.add(weightIter, Math.pow(-1, (int)(Math.random() * 2)) * Math.random() * 0.5);
+						weightChangeVector.add(0, 0.0);
+					}
+					weights.add(nodeIter, weightVector);
+					weightChange.add(nodeIter, weightChangeVector);
+				}
 			}
 			downstreamNodes = this.hiddenLayers.get(layerIter - 1).getNodes();
 		}
 		
 		// create input layer, these node use sigmoidal function
-		for(int nodeIter = 0; nodeIter < configuration.get(0); nodeIter++){
-			this.inputLayer.getNodes().add(new Node(new SigmoidalFunction(), downstreamNodes, nodeIter));
+		for(int nodeIter = 0; nodeIter < Driver.configuration.get(0); nodeIter++){
+			this.inputLayer.getNodes().add(nodeIter, new Node(new SigmoidalFunction(), downstreamNodes, nodeIter));
+
+			// set input weights to 1
+			if(setRandomWeights){
+				ArrayList<Double> weightVector = new ArrayList<>();
+				ArrayList<Double> weightChangeVector = new ArrayList<>();
+				weightVector.add(0, 1.0);
+				weightChangeVector.add(0, 0.0);
+				weights.add(nodeIter, weightVector);
+				weightChange.add(nodeIter, weightChangeVector);
+			}
 		}
+
+		this.setWeights(weights, false);
+		this.setWeights(weightChange, true);
 	}
 	
 	/**
@@ -100,32 +141,46 @@ class  Network implements Comparable {
 	 * 		   The top-level list contains an entry for each node; index 0 is the first input node; the final index is the final output node.
 	 * 		   The sub-list contains weights for the top-level index Node (ie list.get(A) is the weights of node A).
 	 */
-	static ArrayList<ArrayList<Double>> serializeNetwork(Network network){
+	static ArrayList<ArrayList<Double>> serializeNetwork(Network network, boolean isWeightChange){
 		
 		ArrayList<ArrayList<Double>> weights = new ArrayList<ArrayList<Double>>();
 		for(Node node : network.inputLayer.getNodes()){
-			weights.add((ArrayList<Double>)node.getWeights().clone());
-		}
-		for(Layer hiddenLayer : network.getHiddenLayers()){
-			for(Node node : hiddenLayer.getNodes()){
+			if(isWeightChange){
+				weights.add((ArrayList<Double>)node.getPrevWeightChange().clone());
+			}
+			else{
 				weights.add((ArrayList<Double>)node.getWeights().clone());
 			}
 		}
+		for(Layer hiddenLayer : network.getHiddenLayers()){
+			for(Node node : hiddenLayer.getNodes()){
+				if(isWeightChange){
+					weights.add((ArrayList<Double>)node.getPrevWeightChange().clone());
+				}
+				else{
+					weights.add((ArrayList<Double>)node.getWeights().clone());
+				}
+			}
+		}
 		for(Node node : network.outputLayer.getNodes()){
-			weights.add((ArrayList<Double>)node.getWeights().clone());
+			if(isWeightChange){
+				weights.add((ArrayList<Double>)node.getPrevWeightChange().clone());
+			}
+			else{
+				weights.add((ArrayList<Double>)node.getWeights().clone());
+			}
 		}
 		return weights;
 	}
 	
 	/**
 	 * Creates a Network given a representative weighted adjacency matrix
-	 * @param configuration the configuration fo the network
 	 * @param weights matrix the weighted adjacency matrix representing a network
 	 * @return the network represented by the weighted adjacency matrix
 	 */
-	static Network deserializeToNetwork(ArrayList<Integer> configuration, ArrayList<ArrayList<Double>> weights){
+	static Network deserializeToNetwork(ArrayList<ArrayList<Double>> weights){
 		
-		Network network = new Network(configuration);
+		Network network = new Network(false);
 		network.setWeights(weights, false);
 		return network;
 	}
@@ -194,6 +249,7 @@ class  Network implements Comparable {
 			weightsIter++;
 		}
 	}
+
 	
 	public double getFitness() {
 		return this.fitness;
@@ -205,7 +261,24 @@ class  Network implements Comparable {
 
 	@Override
 	public int compareTo(Object otherNetwork) {
-		return (int)(this.fitness - ((Network) otherNetwork).getFitness());
+		return (int) (this.fitness - ((Network) otherNetwork).getFitness());
+	}
+
+	/**
+	 * clears all inputs in the network
+	 */
+	public void clearInputs(){
+		for(Node node : this.inputLayer.getNodes()){
+			node.getInputs().clear();
+		}
+		for(Layer layer : this.hiddenLayers){
+			for(Node node : layer.getNodes()){
+				node.getInputs().clear();
+			}
+		}
+		for(Node node : this.outputLayer.getNodes()){
+			node.getInputs().clear();
+		}
 	}
 }
 
