@@ -250,18 +250,54 @@ class  Network implements Comparable {
 		}
 	}
 
-	
-	public double getFitness() {
-		return this.fitness;
-	}	
-	
-	public void setFitness(double fitness) {
-		this.fitness = fitness;
+	/**
+	 * runs the network on one datapoint
+	 * @param inputs datapoint to run the network on
+	 * @return true if the network classified the point properly, false otherwise
+	 */
+	public boolean evaluate(ArrayList<Object> inputs){
+
+		this.clearInputs();
+		this.setInputs(inputs);
+		Object classifier = this.executeNodes();
+		boolean success = inputs.get(inputs.size() - 1) == classifier;
+		return (success);
 	}
 
-	@Override
-	public int compareTo(Object otherNetwork) {
-		return (int) (this.fitness - ((Network) otherNetwork).getFitness());
+
+	/**
+	 * execute the nodes in the network
+	 * @return the computed output of the network
+	 */
+	private ArrayList<Object> executeNodes(){
+
+		for(Node inputNode : this.getInputLayer().getNodes()){
+			inputNode.activateNode();
+		}
+		for(Layer hiddenLayer : this.getHiddenLayers()){
+			for(Node hiddenNode : hiddenLayer.getNodes()){
+				hiddenNode.activateNode();
+			}
+		}
+		ArrayList<Object> networkOutput = new ArrayList<>();
+		for(Node outputNode : this.getOutputLayer().getNodes()){
+			outputNode.activateNode();
+			networkOutput.add(outputNode.getComputedOutput());
+		}
+		return networkOutput;
+	}
+
+	/**
+	 * sets all inputs in the network
+	 * @param inputs values to assign to the input nodes -- might contain class too, need to modify for loop
+	 */
+	public void setInputs(ArrayList<Object> inputs){
+
+		//for each input node assign the corresponding input to that node
+		for (int inputIter = 0; inputIter < (inputs.size() - 1); inputIter++) {
+
+			this.inputLayer.getNodes().get(inputIter).getInputs().add(inputs.get(inputIter));
+		}
 	}
 
 	/**
@@ -279,6 +315,19 @@ class  Network implements Comparable {
 		for(Node node : this.outputLayer.getNodes()){
 			node.getInputs().clear();
 		}
+	}
+
+	public double getFitness() {
+		return this.fitness;
+	}
+
+	public void setFitness(double fitness) {
+		this.fitness = fitness;
+	}
+
+	@Override
+	public int compareTo(Object otherNetwork) {
+		return (int) (this.fitness - ((Network) otherNetwork).getFitness());
 	}
 }
 
