@@ -4,6 +4,7 @@
 package neuralNetworkTrainer;
 
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 /**
@@ -45,7 +46,6 @@ class Driver {
 	static int numberOffspring; // "lambda"
 	static double mutationRate; // used by GA and ES
 	static double beta;         // used by DE
-
 	
 	/**
 	 * The entry point of the application
