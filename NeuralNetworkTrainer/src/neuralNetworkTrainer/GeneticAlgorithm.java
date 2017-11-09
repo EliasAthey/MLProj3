@@ -146,8 +146,8 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 				}
 				
 				else {//flip which offspring get which gene
-					offspring2.get(chromIter).add(parent1.get(chromIter).get(geneIter));
 					offspring1.get(chromIter).add(parent2.get(chromIter).get(geneIter));
+					offspring2.get(chromIter).add(parent1.get(chromIter).get(geneIter));
 				}
 			}
 		}
@@ -178,24 +178,28 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		return offspring;
 	}
 
-	//classification
-	//TODO:
-	//need to be able to run a single data point through the network in Network.evaluate(datapoint) method
-	//need a set of evaluation data
+
+	/**
+	 * calculates the fitness of the population using a random subset of data and sorts according to that fitness
+	 * @param population individuals to clac fitness for
+	 * @return population sorted according to their fitness
+	 */
 	public ArrayList<Network> evalFitness(ArrayList<Network> population){
-		//evalutaion set of data == eval
-		ArrayList<ArrayList<Double>> eval = new ArrayList<ArrayList<Double>>();
+
+		ArrayList<ArrayList<Object>> evalSet = Driver.dataset.getEvalDataSet(0);
 		
-//		for(Network individual: population) {
-//			double fitness;
-//			for(Object datapoint: eval) {
-//				if(individual.evaluate(eval)) { //returns true or false for classification
-//					fitness++;
-//				}
-//			}
-//
-//			fitness = fitness/eval.size();
-//		}
+		for(Network individual: population) {
+			double fitness = 0;
+
+			for(ArrayList<Object> datapoint: evalSet) {
+				if(individual.evaluate(datapoint)) { //returns true or false for classification
+					fitness++;
+				}
+			}
+
+			fitness = fitness/evalSet.size();
+			individual.setFitness(fitness);
+		}
 		
 		//sorts population based on fitness
 		Collections.sort(population);
@@ -206,32 +210,50 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		//TODO
 		return null;
 	}
-	
-	//maybe we can pass this a boolean to differentiate between classification and function approx
-	//we would only need to check the boolean for eval fitness, maybe hasConverged
+
+
 	@Override
 	Network train() {
 		// TODO 
-		ArrayList<Network> prevPopulation = null;
-		ArrayList<Network> offspring =null;
-		ArrayList<ArrayList<ArrayList<Double>>> serializedPopulation = new ArrayList<>();
-		ArrayList<ArrayList<ArrayList<Double>>> serializedOffspring = new ArrayList<>();
+		ArrayList<Network> prevPopulation = new ArrayList<>();
+		ArrayList<Network> offspring;
+		ArrayList<ArrayList<ArrayList<Double>>> serializedPopulation;
+		ArrayList<ArrayList<ArrayList<Double>>> serializedOffspring;
 
 		ArrayList<Network> population = generatePopulation();
 		population = evalFitness(population);
+
 		while(!hasConverged(population, prevPopulation)){
 			serializedPopulation = serializePopulation(population);
 			setGeneStDev(serializedPopulation);
-			prevPopulation = population;
 			serializedOffspring = newGeneration(serializedPopulation);
 			offspring = deserializePopulation(serializedOffspring);
 			offspring = evalFitness(offspring);
-		//	replacePop(offspring, offspring.fitness)
-		//}
-		//return population;
+			prevPopulation = population;
+			population = replacePop(offspring, population);
+
 		}
 		//returns highest fit individual after convergence
 		return population.get(population.size() - 1);
+	}
+
+	private ArrayList<Network> replacePop(ArrayList<Network> offspring, ArrayList<Network> prevGeneration) {
+		ArrayList<Network> nextGeneration = new ArrayList<>();
+		while(nextGeneration.size() < Driver.populationSize){
+
+			//if the fittest offspring is fitter than the fittest individual from prevGeneration,
+			//add offspring to nextGen and remove from offspring
+			if(offspring.get(offspring.size() - 1).getFitness() >= prevGeneration.get(offspring.size() - 1).getFitness() ){
+				nextGeneration.add(offspring.get(offspring.size() -1));
+				offspring.remove(offspring.size() -1);
+			}
+
+			else{
+				nextGeneration.add(prevGeneration.get(prevGeneration.size() -1));
+				prevGeneration.remove(prevGeneration.size() - 1);
+			}
+		}
+		return nextGeneration;
 	}
 
 	//creates the roulette wheel for rank based selection
