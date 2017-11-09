@@ -11,7 +11,7 @@ public class GlassData extends Data{
      */
     GlassData(){
         numInputs = 9;
-        numOutputs = 1;
+        numOutputs = 7;
         dataPoints = new ArrayList<>();
         this.setDataPoints();
     }
@@ -26,9 +26,10 @@ public class GlassData extends Data{
                 String line = fileScanner.nextLine();
                 String[] entries = line.split(",");
                 ArrayList<Object> values = new ArrayList<>();
-                for(String entry : entries){
-                    values.add(Double.parseDouble(entry));
+                for(int entryIter = 0; entryIter < entries.length - 1; entryIter++){
+                    values.add(Double.parseDouble(entries[entryIter]));
                 }
+                values.add(Double.parseDouble(entries[entries.length - 1]) - 1);
                 dataPoints.add(values);
             }
             catch(NoSuchElementException e){
