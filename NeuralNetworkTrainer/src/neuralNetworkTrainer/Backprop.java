@@ -104,8 +104,13 @@ class Backprop extends TrainingAlgorithm {
 			}
 			ArrayList<ArrayList<Double>> originalWeights = Network.serializeNetwork(network, false);
 
+			// get and print error
+			Double percentError = this.getPercentError(errors);
+			System.out.println("Percent error: " + percentError + "\n");
+			errors.clear();
+
 			// check convergence
-			if(!this.hasConverged(originalWeights, averagedWeights)){
+			if(percentError != 0 && !this.hasConverged(originalWeights, averagedWeights)){
 				network.setWeights(this.getChangeInWeights(averagedWeights, originalWeights), true);
 				network.setWeights(averagedWeights, false);
 
@@ -128,11 +133,6 @@ class Backprop extends TrainingAlgorithm {
 //					}
 //					System.out.print("\n");
 //				}
-				
-				// print error
-				Double percentError = this.getPercentError(errors);
-				System.out.println("Percent error: " + percentError + "\n");
-				errors.clear();
 			}
 			else{
 				// break out of while loop if we have converged
@@ -173,7 +173,7 @@ class Backprop extends TrainingAlgorithm {
 		for(int i = 0; i < originalWeights.size(); i++){
 			for(int j = 0; j < originalWeights.get(i).size(); j++){
 				double difference = originalWeights.get(i).get(j) - currentWeights.get(i).get(j);
-				int estimate = (int)(difference * 1000);
+				int estimate = (int)(difference * 10000);
 				if(estimate != 0){
 					return false;
 				}
