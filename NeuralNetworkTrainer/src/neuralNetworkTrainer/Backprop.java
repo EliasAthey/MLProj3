@@ -50,19 +50,11 @@ class Backprop extends TrainingAlgorithm {
 			for(ArrayList<Object> samplePoint : dataset){
 
 				// set inputs and expected outputs
-				network.clearInputs();
-				expectedOutput.clear();
-				for(int inputIter = 0; inputIter < samplePoint.size(); inputIter++){
-					if(inputIter < samplePoint.size() - 1){ // this assumes the data has 1 output value (the class)
-						network.getInputLayer().getNodes().get(inputIter).getInputs().add(samplePoint.get(inputIter));
-					}
-					else{
-						expectedOutput.add(samplePoint.get(inputIter));
-					}
-				}
+				network.setInputs(samplePoint);
+				expectedOutput.add(samplePoint.get(samplePoint.size() - 1));
 				
 				// execute the nodes in the network and save computed output
-				computedOutput = this.executeNodes(network);
+				computedOutput = network.executeNodes();
 
 				// add squared error to list
 				ArrayList<Double> currentError = this.getError(expectedOutput, computedOutput);
@@ -168,29 +160,6 @@ class Backprop extends TrainingAlgorithm {
 			}
 		}
 		return change;
-	}
-	
-	/**
-	 * execute the nodes in the network
-	 * @param network the Network to execute
-	 * @return the computed output of the network
-	 */
-	private ArrayList<Object> executeNodes(Network network){
-		
-		for(Node inputNode : network.getInputLayer().getNodes()){
-			inputNode.activateNode();
-		}
-		for(Layer hiddenLayer : network.getHiddenLayers()){
-			for(Node hiddenNode : hiddenLayer.getNodes()){
-				hiddenNode.activateNode();
-			}
-		}
-		ArrayList<Object> networkOutput = new ArrayList<>();
-		for(Node outputNode : network.getOutputLayer().getNodes()){
-			outputNode.activateNode();
-			networkOutput.add(outputNode.getComputedOutput());
-		}
-		return networkOutput;
 	}
 	
 	/**

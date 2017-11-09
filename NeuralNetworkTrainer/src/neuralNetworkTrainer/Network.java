@@ -259,7 +259,6 @@ class  Network implements Comparable {
 	 */
 	public boolean evaluate(ArrayList<Object> inputs){
 
-		this.clearInputs();
 		this.setInputs(inputs);
 		Object classifier = this.executeNodes();
 		boolean success = inputs.get(inputs.size() - 1) == classifier;
@@ -271,7 +270,7 @@ class  Network implements Comparable {
 	 * execute the nodes in the network
 	 * @return the computed output of the network
 	 */
-	private ArrayList<Object> executeNodes(){
+	public ArrayList<Object> executeNodes(){
 
 		for(Node inputNode : this.getInputLayer().getNodes()){
 			inputNode.activateNode();
@@ -297,7 +296,7 @@ class  Network implements Comparable {
 
 		//for each input node assign the corresponding input to that node
 		for (int inputIter = 0; inputIter < (inputs.size() - 1); inputIter++) {
-
+			this.inputLayer.getNodes().get(inputIter).getInputs().clear();
 			this.inputLayer.getNodes().get(inputIter).getInputs().add(inputs.get(inputIter));
 		}
 	}
