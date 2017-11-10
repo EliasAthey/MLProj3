@@ -6,7 +6,7 @@ import java.util.Random;
 
 public class GeneticAlgorithm extends TrainingAlgorithm {
 	
-	ArrayList<Integer> rouletteWheel; //used to randomly select parents weighted by their rank
+	RouletteWheel rouletteWheel; //used to randomly select parents weighted by their rank
 	ArrayList<ArrayList<Double>> geneStandardDev = new ArrayList<ArrayList<Double>>(); //holds standardDev of all genes 
 	Random randNum = new Random();
 	
@@ -21,7 +21,7 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 			Network individual = new Network(true);
 			population.add(individual);
 		}
-		this.rouletteWheel = genWheel();
+		this.rouletteWheel = new RouletteWheel();
 		return population;
 	}
 	
@@ -104,8 +104,8 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		ArrayList<ArrayList<ArrayList<Double>>> parentPair = new ArrayList<ArrayList<ArrayList<Double>>>();
 		
 		//select 2 parents randomly based on rank using the roulette wheel
-		parentPair.add(population.get(this.rouletteWheel.get(this.randNum.nextInt(this.rouletteWheel.size()))));
-		parentPair.add(population.get(this.rouletteWheel.get(this.randNum.nextInt(this.rouletteWheel.size()))));
+		parentPair.add(population.get(this.rouletteWheel.get(this.randNum.nextInt(this.rouletteWheel.size))));
+		parentPair.add(population.get(this.rouletteWheel.get(this.randNum.nextInt(this.rouletteWheel.size))));
 		
 		return parentPair;
 	}
@@ -203,7 +203,7 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 		
 		//sorts population based on fitness
 		Collections.sort(population);
-		return null;
+		return population;
 	}
 
 	public Boolean hasConverged (ArrayList<Network> currentPopulation, ArrayList<Network> prevPopulation ){
@@ -254,22 +254,5 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 			}
 		}
 		return nextGeneration;
-	}
-
-	//creates the roulette wheel for rank based selection
-	//every value in the wheel corresponds to a rank
-	//ranks with higher fiteness are more represented in the wheel
-	//sampling randomly from the wheel will give higher fitness ranks 
-	//a greater chance of being selected 
-	public ArrayList<Integer> genWheel(){
-		ArrayList<Integer> wheel = null;
-		
-		for (int rank = 0; rank < Driver.populationSize; rank++) {
-			for (int rankIter = 0; rankIter <= (rank/2); rankIter++) {
-				wheel.add(rank);
-			}
-		}
-		
-		return wheel;
 	}
 }
