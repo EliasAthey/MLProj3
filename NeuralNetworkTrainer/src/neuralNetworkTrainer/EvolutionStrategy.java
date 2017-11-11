@@ -105,29 +105,28 @@ public class EvolutionStrategy extends TrainingAlgorithm {
         ArrayList<ArrayList<Double>> genomeOffspring2 = new ArrayList<>();
         ArrayList<ArrayList<Double>> stratParamsOffspring1 = new ArrayList<>();
         ArrayList<ArrayList<Double>> stratParamsOffspring2 = new ArrayList<>();
+        ArrayList<Double> chromosomeO1 = new ArrayList<>();
+        ArrayList<Double> chromosomeO2 = new ArrayList<>();
+        ArrayList<Double> stratChromosomeO1 = new ArrayList<>();
+        ArrayList<Double> stratChromosomeO2 = new ArrayList<>();
 
         //randomizer selects which offspring gets which gene
         for (int chromIter = 0; chromIter < parent1.getGenome().size(); chromIter++) {
-            genomeOffspring1.add(new ArrayList<>());
-            genomeOffspring2.add(new ArrayList<>());
-            stratParamsOffspring1.add(new ArrayList<>());
-            stratParamsOffspring2.add(new ArrayList<>());
 
             for (int geneIter = 0; geneIter < parent1.getGenome().get(0).size(); geneIter++) {
 
                 if (randomizer.get(chromIter).get(geneIter)) {//give the double from parent1 to offspring1 and p2 to offspring2
-                    genomeOffspring1.get(chromIter).add(parent1.getGenome().get(chromIter).get(geneIter));
-                    genomeOffspring2.get(chromIter).add(parent2.getGenome().get(chromIter).get(geneIter));
+                    chromosomeO1.add(parent1.getGenome().get(chromIter).get(geneIter));
+                    chromosomeO2.add(parent2.getGenome().get(chromIter).get(geneIter));
 
-                    //combine strategy parameters from both parents such that one parent s weighted more than the other
-                    stratParamsOffspring1.get(chromIter).add((parent1.getStrategyParams().get(chromIter).get(geneIter)));
-                    stratParamsOffspring2.get(chromIter).add((parent2.getStrategyParams().get(chromIter).get(geneIter)));
+                    stratChromosomeO1.add((parent1.getStrategyParams().get(chromIter).get(geneIter)));
+                    stratChromosomeO2.add((parent2.getStrategyParams().get(chromIter).get(geneIter)));
                 } else {//flip which offspring get which gene
-                    genomeOffspring1.get(chromIter).add(parent2.getGenome().get(chromIter).get(geneIter));
-                    genomeOffspring2.get(chromIter).add(parent1.getGenome().get(chromIter).get(geneIter));
+                    chromosomeO1.add(parent2.getGenome().get(chromIter).get(geneIter));
+                    chromosomeO2.add(parent1.getGenome().get(chromIter).get(geneIter));
 
-                    stratParamsOffspring1.get(chromIter).add((parent2.getStrategyParams().get(chromIter).get(geneIter)));
-                    stratParamsOffspring2.get(chromIter).add((parent1.getStrategyParams().get(chromIter).get(geneIter)));
+                    stratChromosomeO1.add((parent2.getStrategyParams().get(chromIter).get(geneIter)));
+                    stratChromosomeO2.add((parent1.getStrategyParams().get(chromIter).get(geneIter)));
                 }
             }
         }

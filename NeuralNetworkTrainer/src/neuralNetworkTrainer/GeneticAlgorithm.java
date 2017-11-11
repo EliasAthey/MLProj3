@@ -34,7 +34,7 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
             ArrayList<Double> chromosome = new ArrayList<>();
             this.geneStandardDev.add(chromosome);
 
-            for (int geneIter = 0; geneIter < population.get(0).get(0).size(); geneIter++) {
+            for (int geneIter = 0; geneIter < population.get(chromIter).get(0).size(); geneIter++) {
                 //find mean of a gene
                 double geneMean = 0;
                 ArrayList<Double> geneValues = new ArrayList<Double>();
@@ -127,7 +127,7 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 
             //a chromosome of random booleans that is the same length of the chromosomes of the parents and offspring
             ArrayList<Boolean> randChrom = new ArrayList<Boolean>();
-            for (int geneIter = 0; geneIter < parent1.get(0).size(); geneIter++) {
+            for (int geneIter = 0; geneIter < parent1.get(chromIter).size(); geneIter++) {
                 //fill every randChrom with random booleans
                 randChrom.add(this.randNum.nextBoolean());
             }
@@ -144,7 +144,7 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
             offspring1.add(new ArrayList<Double>());
             offspring2.add(new ArrayList<Double>());
 
-            for (int geneIter = 0; geneIter < parent1.get(0).size(); geneIter++) {
+            for (int geneIter = 0; geneIter < parent1.get(chromIter).size(); geneIter++) {
 
                 if (randomizer.get(chromIter).get(geneIter)) {//give the double from parent1 to offspring1 and p2 to offsp2
                     offspring1.get(chromIter).add(parent1.get(chromIter).get(geneIter));
@@ -181,7 +181,8 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
                         //change gene with a random number from a gaussian distribution
                         //centered at 0
                         //standard deviation is the standard deviation for that particular gene
-                        geneIter.set(gene + geneStandardDev.get(individual.indexOf(chromosome)).get(chromosome.indexOf(gene)) * this.randNum.nextGaussian());
+                        //geneIter.set(gene + geneStandardDev.get(individual.indexOf(chromosome)).get(chromosome.indexOf(gene)) * this.randNum.nextGaussian());
+                        geneIter.set(gene + 2 * this.randNum.nextGaussian());
                     }
                 }
             }
@@ -242,6 +243,7 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
             offspring = evalFitness(offspring);
             prevPopulation = population;
             population = replacePop(offspring, population);
+            System.out.println(population.get(0).getFitness());
 
         }
         //returns highest fit individual after convergence
