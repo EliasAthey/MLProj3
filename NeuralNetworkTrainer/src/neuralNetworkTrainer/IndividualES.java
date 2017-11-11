@@ -13,6 +13,7 @@ public class IndividualES implements Comparable {
     public IndividualES(boolean  initialPopulation){
         Random randNum = new Random();
         strategyParams = new ArrayList<>();
+        genome = new ArrayList<>();
         if(initialPopulation){
             this.network = new Network(true);
             genome = Network.serializeNetwork(this.network, false);

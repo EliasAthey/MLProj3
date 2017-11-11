@@ -254,7 +254,7 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 
             //if the fittest offspring is fitter than the fittest individual from prevGeneration,
             //add offspring to nextGen and remove from offspring
-            if (offspring.get(offspring.size() - 1).getFitness() >= prevGeneration.get(offspring.size() - 1).getFitness()) {
+            if (offspring.get(offspring.size() - 1).getFitness() >= prevGeneration.get(prevGeneration.size() - 1).getFitness()) {
                 nextGeneration.add(offspring.get(offspring.size() - 1));
                 offspring.remove(offspring.size() - 1);
             } else {

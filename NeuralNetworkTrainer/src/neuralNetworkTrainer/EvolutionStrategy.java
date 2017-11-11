@@ -14,6 +14,7 @@ public class EvolutionStrategy extends TrainingAlgorithm {
     private double mutationIncreace = 1.5;
     private RouletteWheel rouletteWheel; //used to randomly select parents weighted by their rank
     Random randNum = new Random();
+    int gencounter = 0;
 
 
     public ArrayList<IndividualES> generatePopulation() {
@@ -59,6 +60,7 @@ public class EvolutionStrategy extends TrainingAlgorithm {
         offspringPool = mutateOffspringFeatures(offspringPool);
         //gives the individuals Networks
         deserializePopulation(offspringPool);
+        offspringPool = evalFitness(offspringPool);
         offspringPool = oneFithRule(offspringPool);
 
         return offspringPool;
@@ -203,7 +205,7 @@ public class EvolutionStrategy extends TrainingAlgorithm {
     // evaluated the fitness of the population
     public ArrayList<IndividualES> evalFitness(ArrayList<IndividualES> population) {
 
-        ArrayList<ArrayList<Object>> evalSet = Driver.dataset.getEvalDataSet(0);
+        ArrayList<ArrayList<Object>> evalSet = Driver.dataset.getEvalDataSet(50);
 
         for (IndividualES individual : population) {
             double fitness = 0;
@@ -220,6 +222,10 @@ public class EvolutionStrategy extends TrainingAlgorithm {
 
         //sorts population based on fitness
         Collections.sort(population);
+        double best = population.get(population.size() - 1).getNetwork().getFitness();
+        double worst = population.get(0).getNetwork().getFitness();
+        System.out.println("Generation " + gencounter);
+        System.out.println(" best = " + best + "\tworst = " + worst);
         return population;
     }
 
@@ -241,6 +247,7 @@ public class EvolutionStrategy extends TrainingAlgorithm {
         ArrayList<IndividualES> offspring = null;
 
         do {
+            gencounter++;
             prevPopulation = population;
             offspring = newGeneration(population);
             population = replacePop(offspring, population);
@@ -258,7 +265,7 @@ public class EvolutionStrategy extends TrainingAlgorithm {
 
             //if the fittest offspring is fitter than the fittest individual from prevGeneration,
             //add offspring to nextGen and remove from offspring
-            if (offspring.get(offspring.size() - 1).getNetwork().getFitness() >= prevGeneration.get(offspring.size() - 1).getNetwork().getFitness()) {
+            if (offspring.get(offspring.size() - 1).getNetwork().getFitness() >= prevGeneration.get(prevGeneration.size() - 1).getNetwork().getFitness()) {
                 nextGeneration.add(offspring.get(offspring.size() - 1));
                 offspring.remove(offspring.size() - 1);
             } else {
