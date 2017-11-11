@@ -9,7 +9,7 @@ public class RouletteWheel {
 
     public RouletteWheel (){
 
-        this.wheel = null;
+        this.wheel = new ArrayList<>();
 
         for (int rank = 0; rank < Driver.populationSize; rank++) {
             for (int rankIter = 0; rankIter <= (rank/2); rankIter++) {
