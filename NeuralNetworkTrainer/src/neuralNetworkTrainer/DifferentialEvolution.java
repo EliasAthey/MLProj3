@@ -1,5 +1,8 @@
 package neuralNetworkTrainer;
 
+import com.sun.org.apache.bcel.internal.generic.NEW;
+import sun.nio.ch.Net;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -71,7 +74,35 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 			newGeneration.add(this.generateOffspring(chosenIndividuals));
 		}
 
-		return this.deserializePopulation(newGeneration);
+		return this.replacePopulation(this.deserializePopulation(currentGeneration), this.deserializePopulation(newGeneration));
+	}
+
+	/**
+	 * Given 2 populations, returns a population of the same size with the best from each
+	 * @param prevGen population 1
+	 * @param currGen population 2
+	 * @return best population
+	 */
+	private ArrayList<Network> replacePopulation(ArrayList<Network> prevGen, ArrayList<Network> currGen){
+		ArrayList<Network> sortedPrevGen = this.evalFitness(prevGen);
+		ArrayList<Network> sortedCurrGen = this.evalFitness(currGen);
+		ArrayList<Network> bestOfBoth = new ArrayList<>();
+
+		int prevGenIter = sortedPrevGen.size() - 1;
+		int currGenIter = sortedCurrGen.size() - 1;
+		int iter = 0;
+		while(iter < prevGen.size()){
+			if(sortedPrevGen.get(prevGenIter).getFitness() > sortedCurrGen.get(currGenIter).getFitness()){
+				bestOfBoth.add(iter, sortedPrevGen.get(prevGenIter));
+				prevGenIter--;
+			}
+			else{
+				bestOfBoth.add(iter, sortedCurrGen.get(currGenIter));
+				currGenIter--;
+			}
+			iter++;
+		}
+		return bestOfBoth;
 	}
 
 	/**
