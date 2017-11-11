@@ -4,6 +4,7 @@ import sun.nio.ch.Net;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.ListIterator;
 import java.util.Random;
 
 public class EvolutionStrategy extends TrainingAlgorithm {
@@ -137,18 +138,27 @@ public class EvolutionStrategy extends TrainingAlgorithm {
 	// look at every Double and with a Driver.mutationRate chance
 	// change that value by getting a random gaussian distributed number centered at
 	// 0 with a standard deviation of 1
-	public ArrayList<IndividualES> mutateOffspring(ArrayList<IndividualES> offspring) {
+	public ArrayList<IndividualES> mutateOffspringFeatures(ArrayList<IndividualES> offspring) {
 
-		// TODO
-		for (IndividualES individual: offspring) {
+		for (final ListIterator<IndividualES> individualIter = offspring.listIterator(); individualIter.hasNext();) {
+			final IndividualES individual = individualIter.next();
+
 			//1/5th rule, best individuals mutate less
 			if (offspring.indexOf(individual) >= ( this.mutOperator * offspring.size())){
-				for (ArrayList<Double> chromosome: individual.getGenome()) {
-					for (Double gene: chromosome){
+
+
+				for (final ListIterator<ArrayList<Double>> chromIter = individual.getGenome().listIterator(); chromIter.hasNext();) {
+					final ArrayList<Double> chromosome = chromIter.next();
+
+					for (final  ListIterator<Double> geneIter = chromosome.listIterator(); geneIter.hasNext();){
+						 final Double gene = geneIter.next();
+
 						if( randNum.nextDouble() <= Driver.mutationRate){
-							gene += individual.getStrategyParams()							//gets strategy parameter associated with the current gene
+							Double newVal = gene + individual.getStrategyParams()							//gets strategy parameter associated with the current gene
 									.get(individual.getGenome().indexOf(chromosome))		//and uses it as a standard deviation for a random gaussian number
 									.get(chromosome.indexOf(gene)) * randNum.nextGaussian();//that is used to mutate the gene
+
+							geneIter.set(newVal);
 						}
 
 					}
@@ -170,7 +180,7 @@ public class EvolutionStrategy extends TrainingAlgorithm {
 				}
 			}
 		}
-		return null;
+		return offspring;
 	}
 
 	// evaluated the fitness of the population
