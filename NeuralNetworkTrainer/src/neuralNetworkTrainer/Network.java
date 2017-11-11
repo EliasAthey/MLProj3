@@ -27,7 +27,7 @@ class  Network implements Comparable {
 	 * The output layer
 	 */
 	private Layer outputLayer;
-	
+
 	/**
 	 * The fitness of this network
 	 */
@@ -330,5 +330,6 @@ class  Network implements Comparable {
 	public int compareTo(Object otherNetwork) {
 		return (int) (this.fitness - ((Network) otherNetwork).getFitness());
 	}
+
 }
 

@@ -1,25 +1,30 @@
 package neuralNetworkTrainer;
 
+import sun.nio.ch.Net;
+
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Random;
 
 public class EvolutionStrategy extends TrainingAlgorithm {
 
-	public ArrayList<Network> generatePopulation() {
 
-		// if this is the same for GA ES and DE maybe we should move this functionality
-		// to TrainingAlgorithm
+	private RouletteWheel rouletteWheel; //used to randomly select parents weighted by their rank
+	Random randNum = new Random();
 
-		ArrayList<Network> population = null;
 
-		// create populationSize number of individuals and add them to population
-		for (int popIter = 0; popIter < Driver.populationSize; popIter++) {
+	public ArrayList<IndividualES> generatePopulation(){
 
-			// adding a global config in driver might be worth doing
-			// or passing config through train() to all these methods
-			Network individual = new Network(true);
+		ArrayList<IndividualES> population = new ArrayList<>();
+
+		//create populationSize number of individuals and add them to population
+		for(int popIter = 0;  popIter < Driver.populationSize; popIter++) {
+
+			IndividualES individual = new IndividualES();
 			population.add(individual);
 		}
+		this.rouletteWheel = new RouletteWheel();
+		Collections.sort(population);
 		return population;
 	}
 
@@ -79,22 +84,52 @@ public class EvolutionStrategy extends TrainingAlgorithm {
 	}
 
 	// evaluated the fitness of the population
-	private ArrayList<Network> evalFitness(ArrayList<Network> population) {
-		ArrayList<Network> fitPop = null;
-		//TODO
-		return fitPop;
+	private ArrayList<IndividualES> evalFitness(ArrayList<IndividualES> population) {
+
+		ArrayList<ArrayList<Object>> evalSet = Driver.dataset.getEvalDataSet(0);
+
+		for(IndividualES individual: population) {
+			double fitness = 0;
+
+			for(ArrayList<Object> datapoint: evalSet) {
+				if(individual.getNetwork().evaluate(datapoint)) { //returns true or false for classification
+					fitness++;
+				}
+			}
+
+			fitness = fitness/evalSet.size();
+			individual.getNetwork().setFitness(fitness);
+		}
+
+		//sorts population based on fitness
+		Collections.sort(population);
+		return population;
 	}
 
 
-	public Boolean hasConverged(ArrayList<Network> currentPopulation, ArrayList<Network> prevPopulation) {
+	public Boolean hasConverged(ArrayList<IndividualES> currentPopulation, ArrayList<IndividualES> prevPopulation) {
 		// TODO
 		return null;
 	}
 
 	@Override
 	Network train() {
-		// TODO Auto-generated method stub
-		return null;
+
+
+		ArrayList<IndividualES> population = generatePopulation();
+		population = evalFitness(population);
+		///serializedPopulation = serializePopulation(population);
+
+		//while(!hasConverged(population, prevPopulation)){
+			//serializedOffspring = newGeneration(serializedPopulation);
+			//offspring = deserializePopulation(serializedOffspring);
+			//offspring = evalFitness(offspring);
+			//prevPopulation = population;
+			//population = replacePop(offspring, population);
+
+		//}
+		//returns highest fit individual after convergence
+		return population.get(population.size() - 1).getNetwork();
 	}
 
 }
