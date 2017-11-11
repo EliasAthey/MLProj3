@@ -30,10 +30,12 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 	@Override
 	Network train() {
 
-		this.previousPopulation = this.generatePopulation();
+		this.currentPopulation = this.generatePopulation();
 
 		do{
+			this.previousPopulation = this.currentPopulation;
 			this.currentPopulation = this.generateNewPopulation(this.serializePopulation(this.previousPopulation));
+			this.currentPercentError = 1 - this.currentPopulation.get(0).getFitness();
 			System.out.println("Current best percent error: " + this.currentPercentError);
 
 		}while( this.currentPercentError != 0.0 && !this.hasConverged(this.previousPopulation, this.currentPopulation));
@@ -68,10 +70,10 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 
 			// generate a single offspring
 			ArrayList<ArrayList<ArrayList<Double>>> chosenIndividuals = new ArrayList<>();
-			chosenIndividuals.add(currentGeneration.get(parentIter));
-			chosenIndividuals.add(currentGeneration.get(otherParentIndices[0]));
-			chosenIndividuals.add(currentGeneration.get(otherParentIndices[1]));
-			chosenIndividuals.add(currentGeneration.get(otherParentIndices[2]));
+			chosenIndividuals.add((ArrayList<ArrayList<Double>>) currentGeneration.get(parentIter).clone());
+			chosenIndividuals.add((ArrayList<ArrayList<Double>>) currentGeneration.get(otherParentIndices[0]).clone());
+			chosenIndividuals.add((ArrayList<ArrayList<Double>>) currentGeneration.get(otherParentIndices[1]).clone());
+			chosenIndividuals.add((ArrayList<ArrayList<Double>>) currentGeneration.get(otherParentIndices[2]).clone());
 			newGeneration.add(this.generateOffspring(chosenIndividuals));
 		}
 
@@ -82,7 +84,7 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 	 * Given 2 populations, returns a population of the same size with the best from each
 	 * @param prevGen population 1
 	 * @param currGen population 2
-	 * @return best population
+	 * @return best population where the first element is the best, last is the worst
 	 */
 	private ArrayList<Network> replacePopulation(ArrayList<Network> prevGen, ArrayList<Network> currGen){
 		ArrayList<Network> sortedPrevGen = this.evalFitness(prevGen);
@@ -150,7 +152,7 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 				}
 			}
 		}
-		return p1;
+		return (ArrayList<ArrayList<Double>>) p1.clone();
 	}
 
 	/**
@@ -195,7 +197,7 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 	 */
 	//converts networks into matrixes for reproduction 
 	public ArrayList<ArrayList<ArrayList<Double>>> serializePopulation( ArrayList<Network> population){
-		ArrayList<ArrayList<ArrayList<Double>>> serializedPopulation = new ArrayList<ArrayList<ArrayList<Double>>>();
+		ArrayList<ArrayList<ArrayList<Double>>> serializedPopulation = new ArrayList<>();
 		
 		for (Network individual : population) {
 			serializedPopulation.add(Network.serializeNetwork(individual, false));
@@ -211,8 +213,6 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 	public Boolean hasConverged(ArrayList<Network> prevPop, ArrayList<Network> currPop) {
 		Network bestPrevNetwork = this.evalFitness(prevPop).get(prevPop.size() - 1);
 		Network bestCurrNetwork = this.evalFitness(currPop).get(currPop.size() - 1);
-
-		this.currentPercentError = (1 - bestCurrNetwork.getFitness());
 
 		ArrayList<ArrayList<Double>> bestPrevWeights = Network.serializeNetwork(bestPrevNetwork, false);
 		ArrayList<ArrayList<Double>> bestCurrWeights = Network.serializeNetwork(bestCurrNetwork, false);
