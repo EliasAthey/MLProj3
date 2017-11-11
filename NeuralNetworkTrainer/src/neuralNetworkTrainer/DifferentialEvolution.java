@@ -5,12 +5,124 @@ import java.util.Collections;
 
 public class DifferentialEvolution extends TrainingAlgorithm {
 
+	/**
+	 * The previous iteration's population
+	 */
+	private ArrayList<Network> previousPopulation;
+
+	/**
+	 * The current iteration's population
+	 */
+	private ArrayList<Network> currentPopulation;
+
+	/**
+	 * Keep creating new generations until convergence
+	 * @return the best network after convergence
+	 */
+	@Override
+	Network train() {
+
+		this.previousPopulation = this.generatePopulation();
+
+		do{
+			this.currentPopulation = this.generateNewPopulation(this.serializePopulation(this.previousPopulation));
+
+		}while(!this.hasConverged(this.previousPopulation, this.currentPopulation));
+
+		this.evalFitness(this.currentPopulation);
+		return this.currentPopulation.get(this.currentPopulation.size() - 1);
+	}
+
+	/**
+	 * Given the previous generation, generates a new population
+	 * @param currentGeneration the current generation
+	 * @return the new generation
+	 */
+	private ArrayList<Network> generateNewPopulation(ArrayList<ArrayList<ArrayList<Double>>> currentGeneration){
+
+		ArrayList<ArrayList<ArrayList<Double>>> newGeneration = new ArrayList<>();
+		for(int parentIter = 0; parentIter < currentGeneration.size(); parentIter++){
+
+			// randomly choose 3 "parent" individuals
+			int[] otherParentIndices = new int[3];
+			for(int otherParentIter = 0; otherParentIter < 3; otherParentIter++){
+				int index = parentIter;
+				while(
+						index == parentIter
+								|| index == otherParentIndices[0]
+								|| index == otherParentIndices[1]
+								|| index == otherParentIndices[2]){
+					index = (int)(Math.random() * currentGeneration.size());
+				}
+				otherParentIndices[otherParentIter] = index;
+			}
+
+			// generate a single offspring
+			ArrayList<ArrayList<ArrayList<Double>>> chosenIndividuals = new ArrayList<>();
+			chosenIndividuals.add(currentGeneration.get(parentIter));
+			chosenIndividuals.add(currentGeneration.get(otherParentIndices[0]));
+			chosenIndividuals.add(currentGeneration.get(otherParentIndices[1]));
+			chosenIndividuals.add(currentGeneration.get(otherParentIndices[2]));
+			newGeneration.add(this.generateOffspring(chosenIndividuals));
+		}
+
+		return this.deserializePopulation(newGeneration);
+	}
+
+	/**
+	 * Generates a single offspring using the conventional DE algorithm
+	 * @param parents parents[0] contains the original parent
+	 *                parents[1] contains the target individual
+	 *                parents[2] and parents[3] contain the difference individuals
+	 * @return the "mutated" and crossed offspring
+	 */
+	private ArrayList<ArrayList<Double>> generateOffspring(ArrayList<ArrayList<ArrayList<Double>>> parents){
+		ArrayList<ArrayList<Double>> trialIndividual = new ArrayList<>();
+
+		// iterate through the weight vectors
+		for(int nodeIter = 0; nodeIter < parents.get(0).size(); nodeIter++){
+			ArrayList<Double> weightVector = new ArrayList<>();
+
+			// iterate through each weight and assign trial individual weight
+			for(int weightIter = 0; weightIter < parents.get(0).get(nodeIter).size(); weightIter++){
+				double x1 = parents.get(1).get(nodeIter).get(weightIter);
+				double x2 = parents.get(2).get(nodeIter).get(weightIter);
+				double x3 = parents.get(3).get(nodeIter).get(weightIter);
+				weightVector.add(x1 + (Driver.beta * (x2 - x3)));
+			}
+			trialIndividual.add(weightVector);
+		}
+		return this.crossover(parents.get(0), trialIndividual);
+	}
+
+	/**
+	 * Performs uniform crossover between two parents
+	 * @param p1 parent 1
+	 * @param p2 parent 2
+	 * @return the crossed child
+	 */
+	private ArrayList<ArrayList<Double>> crossover(ArrayList<ArrayList<Double>> p1, ArrayList<ArrayList<Double>> p2){
+		// iterate through the weight vectors
+		for(int nodeIter = 0; nodeIter < p1.size(); nodeIter++){
+
+			// iterate through each weight, randomly (uniformly) swap p1 weight with p2 weight
+			for(int weightIter = 0; weightIter < p1.get(nodeIter).size(); weightIter++){
+				if(Math.random() < 0.5){
+					p1.get(nodeIter).remove(weightIter);
+					p1.get(nodeIter).add(weightIter, p2.get(nodeIter).get(weightIter));
+				}
+			}
+		}
+		return p1;
+	}
+
+	/**
+	 * Generates a population of networks
+	 * @return a population of networks
+	 */
 	public ArrayList<Network> generatePopulation() {
 
-		// if this is the same for GA ES and DE maybe we should move this functionality
-		// to TrainingAlgorithm
-
-		ArrayList<Network> population = null;
+		ArrayList<Network> population = new ArrayList<>();
 
 		// create populationSize number of individuals and add them to population
 		for (int popIter = 0; popIter < Driver.populationSize; popIter++) {
@@ -22,20 +134,28 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 		}
 		return population;
 	}
-	
 
-	
+	/**
+	 * Deserializes a population of ArrayList<ArrayList<ArrayList<Double>>>
+	 * @param population a population of ArrayList<ArrayList<ArrayList<Double>>>
+	 * @return a population of networks
+	 */
 	//converts matrixes into networks for fitness evaluation
 	public ArrayList<Network>  deserializePopulation (ArrayList<ArrayList<ArrayList<Double>>> population) {
-		ArrayList<Network> deserializedPopulation = new ArrayList<Network>();
+		ArrayList<Network> deserializedPopulation = new ArrayList<>();
 		
 		for (ArrayList<ArrayList<Double>> individual : population) {
-			deserializedPopulation.add(Network.deserializeToNetwork( individual));
+			deserializedPopulation.add(Network.deserializeToNetwork(individual));
 		}
 		
 		return deserializedPopulation;
 	}
-	
+
+	/**
+	 * Serializes a population of networks
+	 * @param population a population of networks
+	 * @return a population of ArrayList<ArrayList<ArrayList<Double>>>
+	 */
 	//converts networks into matrixes for reproduction 
 	public ArrayList<ArrayList<ArrayList<Double>>> serializePopulation( ArrayList<Network> population){
 		ArrayList<ArrayList<ArrayList<Double>>> serializedPopulation = new ArrayList<ArrayList<ArrayList<Double>>>();
@@ -46,57 +166,53 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 		
 		return serializedPopulation;
 	}
-	
 
-	// creates a new generation using rank based selection of parents, crossover and
-	// mutation, then returns the new generation
-	// This is specific to having 2 offspring from 2 parents but is generalizable to
-	// any number of parents and offspring with a little refactoring
-	public ArrayList<ArrayList<ArrayList<Double>>> newGeneration(ArrayList<ArrayList<ArrayList<Double>>> population) {
-		//TODO
-		return null;
+	/**
+	 * Checks convergence
+	 * @return true if the populations have converged, false otherwise
+	 */
+	public Boolean hasConverged(ArrayList<Network> prevPop, ArrayList<Network> currPop) {
+		Network bestPrevNetwork = this.evalFitness(prevPop).get(prevPop.size() - 1);
+		Network bestCurrNetwork = this.evalFitness(currPop).get(currPop.size() - 1);
+
+		ArrayList<ArrayList<Double>> bestPrevWeights = Network.serializeNetwork(bestPrevNetwork, false);
+		ArrayList<ArrayList<Double>> bestCurrWeights = Network.serializeNetwork(bestCurrNetwork, false);
+		for(int nodeIter = 0; nodeIter < bestPrevWeights.size(); nodeIter++){
+			for(int weightIter =0; weightIter < bestPrevWeights.get(nodeIter).size(); weightIter++){
+				if(bestPrevWeights.get(nodeIter).get(weightIter) !=  bestCurrWeights.get(nodeIter).get(weightIter)){
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
-	public ArrayList<ArrayList<ArrayList<Double>>> selectParents(ArrayList<ArrayList<ArrayList<Double>>> population) {
-		// TODO
-		return null;
-	}
+	/**
+	 * calculates the fitness of the population using a random subset of data and sorts according to that fitness
+	 * @param population individuals to calculate fitness for
+	 * @return population sorted according to their fitness
+	 */
+	private ArrayList<Network> evalFitness(ArrayList<Network> population){
 
-	// creates a List of boolean Lists that mirrors the dimensions and structure of
-	// an individual
-	// uses the list to randomly assign genes from parents to offspring
-	public ArrayList<ArrayList<ArrayList<Double>>> crossoverOffspring(ArrayList<ArrayList<Double>> parent1,
-			ArrayList<ArrayList<Double>> parent2) {
-		// TODO
-		return null;
-	}
+		ArrayList<ArrayList<Object>> evalSet = Driver.dataset.getEvalDataSet(0);
 
-	// for any number of offspring:
-	// look at every Double and with a Driver.mutationRate chance
-	// change that value by getting a random gaussian distributed number centered at
-	// 0 with a standard deviation of 1
-	public ArrayList<ArrayList<ArrayList<Double>>> mutateOffspring(ArrayList<ArrayList<ArrayList<Double>>> offspring) {
+		for(Network individual: population) {
+			double fitness = 0;
 
-		// TODO
-		return null;
-	}
+			for(ArrayList<Object> datapoint: evalSet) {
+				if(individual.evaluate(datapoint)) { //returns true or false for classification
+					fitness++;
+				}
+			}
 
-	// evaluated the fitness of the population
-	private ArrayList<Network> evalFitness(ArrayList<Network> population) {
-		ArrayList<Network> fitPop = null;
-		//TODO
-		return fitPop;
-	}
+			fitness = fitness/evalSet.size();
+			individual.setFitness(fitness);
+		}
 
-	public Boolean hasConverged(ArrayList<Network> currentPopulation, ArrayList<Network> prevPopulation) {
-		// TODO
-		return null;
-	}
-
-	@Override
-	Network train() {
-		// TODO Auto-generated method stub
-		return null;
+		//sorts population based on fitness
+		Collections.sort(population);
+		return population;
 	}
 
 }

@@ -182,7 +182,7 @@ class  Network implements Comparable {
 	 */
 	static Network deserializeToNetwork(ArrayList<ArrayList<Double>> weights){
 		
-		Network network = new Network(false);
+		Network network = new Network(true);
 		network.setWeights(weights, false);
 		return network;
 	}
