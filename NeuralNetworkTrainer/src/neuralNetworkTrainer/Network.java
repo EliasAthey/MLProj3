@@ -337,8 +337,6 @@ class  Network implements Comparable {
 	}
 
 	@Override
-	public int compareTo(Object otherNetwork) {
-		return (int) (this.fitness - ((Network) otherNetwork).getFitness());
-	}
+	public int compareTo(Object otherNetwork) { return (int) ((this.fitness - ((Network) otherNetwork).getFitness()) * 10000); }
 }
 
