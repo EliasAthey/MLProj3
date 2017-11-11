@@ -16,6 +16,11 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 	private ArrayList<Network> currentPopulation;
 
 	/**
+	 * The current iteration's error rate of the best individual
+	 */
+	private double currentPercentError = 1.0;
+
+	/**
 	 * Keep creating new generations until convergence
 	 * @return the best network after convergence
 	 */
@@ -27,7 +32,7 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 		do{
 			this.currentPopulation = this.generateNewPopulation(this.serializePopulation(this.previousPopulation));
 
-		}while(!this.hasConverged(this.previousPopulation, this.currentPopulation));
+		}while( this.currentPercentError != 0.0 && !this.hasConverged(this.previousPopulation, this.currentPopulation));
 
 		this.evalFitness(this.currentPopulation);
 		return this.currentPopulation.get(this.currentPopulation.size() - 1);
@@ -175,6 +180,8 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 		Network bestPrevNetwork = this.evalFitness(prevPop).get(prevPop.size() - 1);
 		Network bestCurrNetwork = this.evalFitness(currPop).get(currPop.size() - 1);
 
+		System.out.println("Current best percent error: " + (1 - bestCurrNetwork.getFitness()));
+
 		ArrayList<ArrayList<Double>> bestPrevWeights = Network.serializeNetwork(bestPrevNetwork, false);
 		ArrayList<ArrayList<Double>> bestCurrWeights = Network.serializeNetwork(bestCurrNetwork, false);
 		for(int nodeIter = 0; nodeIter < bestPrevWeights.size(); nodeIter++){
@@ -184,7 +191,6 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 				}
 			}
 		}
-
 		return true;
 	}
 
