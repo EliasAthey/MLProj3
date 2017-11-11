@@ -9,227 +9,266 @@ import java.util.Random;
 
 public class EvolutionStrategy extends TrainingAlgorithm {
 
-	private double mutOperator = .82;
-	private RouletteWheel rouletteWheel; //used to randomly select parents weighted by their rank
-	Random randNum = new Random();
+    private double oneFith = .82;
+    private double mutationRedux = .25;
+    private double mutationIncreace = 1.5;
+    private RouletteWheel rouletteWheel; //used to randomly select parents weighted by their rank
+    Random randNum = new Random();
 
 
-	public ArrayList<IndividualES> generatePopulation(){
+    public ArrayList<IndividualES> generatePopulation() {
 
-		ArrayList<IndividualES> population = new ArrayList<>();
+        ArrayList<IndividualES> population = new ArrayList<>();
 
-		//create populationSize number of individuals and add them to population
-		for(int popIter = 0;  popIter < Driver.populationSize; popIter++) {
+        //create populationSize number of individuals and add them to population
+        for (int popIter = 0; popIter < Driver.populationSize; popIter++) {
 
-			IndividualES individual = new IndividualES(true);
-			population.add(individual);
-		}
-		this.rouletteWheel = new RouletteWheel();
-		Collections.sort(population);
-		return population;
-	}
+            IndividualES individual = new IndividualES(true);
+            population.add(individual);
+        }
+        this.rouletteWheel = new RouletteWheel();
+        Collections.sort(population);
+        return population;
+    }
 
-	// converts matrixes into networks for fitness evaluation
-	public ArrayList<Network> deserializePopulation(ArrayList<ArrayList<ArrayList<Double>>> population) {
-		ArrayList<Network> deserializedPopulation = new ArrayList<Network>();
+    // converts matrixes into networks for fitness evaluation
+    public void deserializePopulation(ArrayList<IndividualES> population) {
 
-		for (ArrayList<ArrayList<Double>> individual : population) {
-			deserializedPopulation.add(Network.deserializeToNetwork(individual));
-		}
+        for (IndividualES individual : population) {
+            individual.setNetwork(Network.deserializeToNetwork(individual.getGenome()));
+        }
+    }
 
-		return deserializedPopulation;
-	}
+    // creates a new generation using rank based selection of parents, crossover and
+    // mutation, then returns the new generation
+    // This is specific to having 2 offspring from 2 parents but is generalizable to
+    // any number of parents and offspring with a little refactoring
+    public ArrayList<IndividualES> newGeneration(ArrayList<IndividualES> population) {
 
-	// converts networks into matrixes for reproduction
-	public ArrayList<ArrayList<ArrayList<Double>>> serializePopulation(ArrayList<Network> population) {
-		ArrayList<ArrayList<ArrayList<Double>>> serializedPopulation = new ArrayList<ArrayList<ArrayList<Double>>>();
+        ArrayList<IndividualES> offspringPool = new ArrayList<>();
+        ArrayList<IndividualES> parentPair;
+        ArrayList<IndividualES> offspringPair;
 
-		for (Network individual : population) {
-			serializedPopulation.add(Network.serializeNetwork(individual, false));
-		}
+        while (offspringPool.size() < Driver.numberOffspring) {                                                    //continue until the new generation is the required offspring size
+            parentPair = selectParents(population);                                            //selects 2 parents with rank based selection
+            offspringPair = crossoverOffspring(parentPair.get(0), parentPair.get(1));        //creates 2 new offspring via crossover
+            offspringPool.add(offspringPair.get(0));            //adds new offspring to the new generation
+            offspringPool.add(offspringPair.get(1));            //adds new offspring to the new generation
+        }
 
-		return serializedPopulation;
-	}
+        offspringPool = mutateOffspringFeatures(offspringPool);
+        //gives the individuals Networks
+        deserializePopulation(offspringPool);
+        offspringPool = oneFithRule(offspringPool);
 
-	// creates a new generation using rank based selection of parents, crossover and
-	// mutation, then returns the new generation
-	// This is specific to having 2 offspring from 2 parents but is generalizable to
-	// any number of parents and offspring with a little refactoring
-	public ArrayList<ArrayList<ArrayList<Double>>> newGeneration(ArrayList<ArrayList<ArrayList<Double>>> population) {
-		//TODO
-		return null;
-	}
+        return offspringPool;
+    }
 
-	public ArrayList<ArrayList<ArrayList<Double>>> selectParents(ArrayList<ArrayList<ArrayList<Double>>> population) {
-		// TODO
-		return null;
-	}
+    public ArrayList<IndividualES> selectParents(ArrayList<IndividualES> population) {
 
-	// creates a List of boolean Lists that mirrors the dimensions and structure of
-	// an individual and uses the list to randomly assign genes from parents to offspring
-	public ArrayList<IndividualES> crossoverOffspring(IndividualES parent1, IndividualES parent2) {
+        ArrayList<IndividualES> parentPair = new ArrayList<>();
 
-		//List of boolean Lists to decide if offspring get their genes from parent1 or parent2
-		ArrayList<ArrayList<Boolean>> randomizer = new ArrayList<ArrayList<Boolean>>();
+        //select 2 parents randomly based on rank using the roulette wheel
+        parentPair.add(population.get(this.rouletteWheel.get(this.randNum.nextInt(this.rouletteWheel.size))));
+        parentPair.add(population.get(this.rouletteWheel.get(this.randNum.nextInt(this.rouletteWheel.size))));
 
-		for (ArrayList<Double> chromosome: parent1.getGenome()) {
+        return parentPair;
+    }
 
-			//a chromosome of random booleans that is the same length of the chromosomes of the parents and offspring
-			ArrayList<Boolean> randChrom = new ArrayList<Boolean>();
+    // creates a List of boolean Lists that mirrors the dimensions and structure of
+    // an individual and uses the list to randomly assign genes from parents to offspring
+    public ArrayList<IndividualES> crossoverOffspring(IndividualES parent1, IndividualES parent2) {
 
-			for (Double gene: chromosome) {
-				//fill every randChrom with random booleans
-				randChrom.add(this.randNum.nextBoolean());
-			}
-			randomizer.add(randChrom);
-		}
+        //List of boolean Lists to decide if offspring get their genes from parent1 or parent2
+        ArrayList<ArrayList<Boolean>> randomizer = new ArrayList<ArrayList<Boolean>>();
 
-		//make offspring
-		IndividualES offspring1 = new IndividualES(false);
-		IndividualES offspring2 = new IndividualES(false);
+        for (ArrayList<Double> chromosome : parent1.getGenome()) {
 
+            //a chromosome of random booleans that is the same length of the chromosomes of the parents and offspring
+            ArrayList<Boolean> randChrom = new ArrayList<Boolean>();
 
-		ArrayList<ArrayList<Double>> genomeOffspring1 = new ArrayList<>();
-		ArrayList<ArrayList<Double>> genomeOffspring2 = new ArrayList<>();
-		ArrayList<ArrayList<Double>> stratParamsOffspring1 = new ArrayList<>();
-		ArrayList<ArrayList<Double>> stratParamsOffspring2 = new ArrayList<>();
+            for (Double gene : chromosome) {
+                //fill every randChrom with random booleans
+                randChrom.add(this.randNum.nextBoolean());
+            }
+            randomizer.add(randChrom);
+        }
 
-		//randomizer selects which offspring gets which gene
-		for(int chromIter = 0; chromIter < parent1.getGenome().size(); chromIter++) {
-			genomeOffspring1.add(new ArrayList<>());
-			genomeOffspring2.add(new ArrayList<>());
-			stratParamsOffspring1.add(new ArrayList<>());
-			stratParamsOffspring2.add(new ArrayList<>());
-
-			for(int geneIter = 0; geneIter < parent1.getGenome().get(0).size(); geneIter++) {
-
-				if (randomizer.get(chromIter).get(geneIter)) {//give the double from parent1 to offspring1 and p2 to offspring2
-					genomeOffspring1.get(chromIter).add(parent1.getGenome().get(chromIter).get(geneIter));
-					genomeOffspring2.get(chromIter).add(parent2.getGenome().get(chromIter).get(geneIter));
-
-					//combine strategy parameters from both parents such that one parent s weighted more than the other
-					stratParamsOffspring1.get(chromIter).add((parent1.getStrategyParams().get(chromIter).get(geneIter)));
-					stratParamsOffspring2.get(chromIter).add((parent2.getStrategyParams().get(chromIter).get(geneIter)));
-				}
-
-				else {//flip which offspring get which gene
-					genomeOffspring1.get(chromIter).add(parent2.getGenome().get(chromIter).get(geneIter));
-					genomeOffspring2.get(chromIter).add(parent1.getGenome().get(chromIter).get(geneIter));
-
-					stratParamsOffspring1.get(chromIter).add((parent2.getStrategyParams().get(chromIter).get(geneIter)));
-					stratParamsOffspring2.get(chromIter).add((parent1.getStrategyParams().get(chromIter).get(geneIter)));
-				}
-			}
-		}
-		//add the genomes and the stratParams to the offspring
-		offspring1.setGenome(genomeOffspring1);
-		offspring2.setGenome(genomeOffspring2);
-		offspring1.setStrategyParams(stratParamsOffspring1);
-		offspring2.setStrategyParams(stratParamsOffspring2);
-
-		//create the offspring pair that will be returned
-		ArrayList<IndividualES> offspringPair = new ArrayList<>();
-		offspringPair.add(offspring2);
-		offspringPair.add(offspring1);
-		return offspringPair;
-	}
-
-	// for any number of offspring:
-	// look at every Double and with a Driver.mutationRate chance
-	// change that value by getting a random gaussian distributed number centered at
-	// 0 with a standard deviation of 1
-	public ArrayList<IndividualES> mutateOffspringFeatures(ArrayList<IndividualES> offspring) {
-
-		for (final ListIterator<IndividualES> individualIter = offspring.listIterator(); individualIter.hasNext();) {
-			final IndividualES individual = individualIter.next();
-
-			//1/5th rule, best individuals mutate less
-			if (offspring.indexOf(individual) >= ( this.mutOperator * offspring.size())){
+        //make offspring
+        IndividualES offspring1 = new IndividualES(false);
+        IndividualES offspring2 = new IndividualES(false);
 
 
-				for (final ListIterator<ArrayList<Double>> chromIter = individual.getGenome().listIterator(); chromIter.hasNext();) {
-					final ArrayList<Double> chromosome = chromIter.next();
+        ArrayList<ArrayList<Double>> genomeOffspring1 = new ArrayList<>();
+        ArrayList<ArrayList<Double>> genomeOffspring2 = new ArrayList<>();
+        ArrayList<ArrayList<Double>> stratParamsOffspring1 = new ArrayList<>();
+        ArrayList<ArrayList<Double>> stratParamsOffspring2 = new ArrayList<>();
 
-					for (final  ListIterator<Double> geneIter = chromosome.listIterator(); geneIter.hasNext();){
-						 final Double gene = geneIter.next();
+        //randomizer selects which offspring gets which gene
+        for (int chromIter = 0; chromIter < parent1.getGenome().size(); chromIter++) {
+            genomeOffspring1.add(new ArrayList<>());
+            genomeOffspring2.add(new ArrayList<>());
+            stratParamsOffspring1.add(new ArrayList<>());
+            stratParamsOffspring2.add(new ArrayList<>());
 
-						if( randNum.nextDouble() <= Driver.mutationRate){
-							Double newVal = gene + individual.getStrategyParams()							//gets strategy parameter associated with the current gene
-									.get(individual.getGenome().indexOf(chromosome))		//and uses it as a standard deviation for a random gaussian number
-									.get(chromosome.indexOf(gene)) * randNum.nextGaussian();//that is used to mutate the gene
+            for (int geneIter = 0; geneIter < parent1.getGenome().get(0).size(); geneIter++) {
 
-							geneIter.set(newVal);
-						}
+                if (randomizer.get(chromIter).get(geneIter)) {//give the double from parent1 to offspring1 and p2 to offspring2
+                    genomeOffspring1.get(chromIter).add(parent1.getGenome().get(chromIter).get(geneIter));
+                    genomeOffspring2.get(chromIter).add(parent2.getGenome().get(chromIter).get(geneIter));
 
-					}
-				}
-			}
-			else{
-				//worse individuals mutate more
-				if (offspring.indexOf(individual) >= ( this.mutOperator * offspring.size())){
-					for (ArrayList<Double> chromosome: individual.getGenome()) {
-						for (Double gene: chromosome){
-							if( randNum.nextDouble() <= (Driver.mutationRate * 2) ){			//2 times as likely to mutate with 1.5 * greater deviation
-								gene += individual.getStrategyParams()							//gets strategy parameter associated with the current gene
-										.get(individual.getGenome().indexOf(chromosome))		//and uses it as a standard deviation for a random gaussian number
-										.get(chromosome.indexOf(gene)) * randNum.nextGaussian() *1.5;//that is used to mutate the gene
-							}
+                    //combine strategy parameters from both parents such that one parent s weighted more than the other
+                    stratParamsOffspring1.get(chromIter).add((parent1.getStrategyParams().get(chromIter).get(geneIter)));
+                    stratParamsOffspring2.get(chromIter).add((parent2.getStrategyParams().get(chromIter).get(geneIter)));
+                } else {//flip which offspring get which gene
+                    genomeOffspring1.get(chromIter).add(parent2.getGenome().get(chromIter).get(geneIter));
+                    genomeOffspring2.get(chromIter).add(parent1.getGenome().get(chromIter).get(geneIter));
 
-						}
-					}
-				}
-			}
-		}
-		return offspring;
-	}
+                    stratParamsOffspring1.get(chromIter).add((parent2.getStrategyParams().get(chromIter).get(geneIter)));
+                    stratParamsOffspring2.get(chromIter).add((parent1.getStrategyParams().get(chromIter).get(geneIter)));
+                }
+            }
+        }
+        //add the genomes and the stratParams to the offspring
+        offspring1.setGenome(genomeOffspring1);
+        offspring2.setGenome(genomeOffspring2);
+        offspring1.setStrategyParams(stratParamsOffspring1);
+        offspring2.setStrategyParams(stratParamsOffspring2);
 
-	// evaluated the fitness of the population
-	private ArrayList<IndividualES> evalFitness(ArrayList<IndividualES> population) {
+        //create the offspring pair that will be returned
+        ArrayList<IndividualES> offspringPair = new ArrayList<>();
+        offspringPair.add(offspring2);
+        offspringPair.add(offspring1);
+        return offspringPair;
+    }
 
-		ArrayList<ArrayList<Object>> evalSet = Driver.dataset.getEvalDataSet(0);
+    // for any number of offspring:
+    // look at every Double and with a Driver.mutationRate chance
+    // change that value by getting a random gaussian distributed number centered at
+    // 0 with a standard deviation of 1
+    public ArrayList<IndividualES> mutateOffspringFeatures(ArrayList<IndividualES> offspring) {
 
-		for(IndividualES individual: population) {
-			double fitness = 0;
-
-			for(ArrayList<Object> datapoint: evalSet) {
-				if(individual.getNetwork().evaluate(datapoint)) { //returns true or false for classification
-					fitness++;
-				}
-			}
-
-			fitness = fitness/evalSet.size();
-			individual.getNetwork().setFitness(fitness);
-		}
-
-		//sorts population based on fitness
-		Collections.sort(population);
-		return population;
-	}
+        for (final ListIterator<IndividualES> individualIter = offspring.listIterator(); individualIter.hasNext(); ) {
+            final IndividualES individual = individualIter.next();
 
 
-	public Boolean hasConverged(ArrayList<IndividualES> currentPopulation, ArrayList<IndividualES> prevPopulation) {
-		// TODO
-		return null;
-	}
+            for (final ListIterator<ArrayList<Double>> chromIter = individual.getGenome().listIterator(); chromIter.hasNext(); ) {
+                final ArrayList<Double> chromosome = chromIter.next();
 
-	@Override
-	Network train() {
-		//eval fitness of offspring before mutation--------------
+                for (final ListIterator<Double> geneIter = chromosome.listIterator(); geneIter.hasNext(); ) {
+                    final Double gene = geneIter.next();
 
-		ArrayList<IndividualES> population = generatePopulation();
-		population = evalFitness(population);
-		///serializedPopulation = serializePopulation(population);
+                    if (randNum.nextDouble() <= Driver.mutationRate) {
+                        Double newVal = gene + individual.getStrategyParams()            //gets strategy parameter associated with the current gene
+                                .get(individual.getGenome().indexOf(chromosome))        //and uses it as a standard deviation for a random gaussian number
+                                .get(chromosome.indexOf(gene)) * randNum.nextGaussian();//that is used to mutate the gene
 
-		//while(!hasConverged(population, prevPopulation)){
-			//serializedOffspring = newGeneration(serializedPopulation);
-			//offspring = deserializePopulation(serializedOffspring);
-			//offspring = evalFitness(offspring);
-			//prevPopulation = population;
-			//population = replacePop(offspring, population);
+                        geneIter.set(newVal);
+                    }
 
-		//}
-		//returns highest fit individual after convergence
-		return population.get(population.size() - 1).getNetwork();
-	}
+                }
+            }
+        }
+
+        return offspring;
+    }
+
+    public ArrayList<IndividualES> oneFithRule(ArrayList<IndividualES> offspring) {
+
+        for (final ListIterator<IndividualES> individualIter = offspring.listIterator(); individualIter.hasNext(); ) {
+            final IndividualES individual = individualIter.next();
+
+            for (final ListIterator<ArrayList<Double>> chromIter = individual.getStrategyParams().listIterator(); chromIter.hasNext(); ) {
+                final ArrayList<Double> chromosome = chromIter.next();
+
+                for (final ListIterator<Double> geneIter = chromosome.listIterator(); geneIter.hasNext(); ) {
+                    final Double gene = geneIter.next();
+
+                    //reduce the top fitness individuals mutation stdev, increace the bottom fitness individuals stdev
+                    if (offspring.indexOf(individual) >= (this.oneFith * offspring.size())) {
+                        Double newVal = gene + this.mutationRedux;
+                        geneIter.set(newVal);
+                    } else {
+                        Double newVal = gene + this.mutationIncreace;
+                        geneIter.set(newVal);
+                    }
+
+                }
+            }
+        }
+        return offspring;
+    }
+
+
+    // evaluated the fitness of the population
+    public ArrayList<IndividualES> evalFitness(ArrayList<IndividualES> population) {
+
+        ArrayList<ArrayList<Object>> evalSet = Driver.dataset.getEvalDataSet(0);
+
+        for (IndividualES individual : population) {
+            double fitness = 0;
+
+            for (ArrayList<Object> datapoint : evalSet) {
+                if (individual.getNetwork().evaluate(datapoint)) { //returns true or false for classification
+                    fitness++;
+                }
+            }
+
+            fitness = fitness / evalSet.size();
+            individual.getNetwork().setFitness(fitness);
+        }
+
+        //sorts population based on fitness
+        Collections.sort(population);
+        return population;
+    }
+
+
+    public Boolean hasConverged(ArrayList<IndividualES> currentPopulation, ArrayList<IndividualES> prevPopulation) {
+        if (prevPopulation == null) {
+            return false;
+        }
+        // TODO
+        return false;
+    }
+
+    @Override
+    Network train() {
+
+        ArrayList<IndividualES> population = generatePopulation();
+        population = evalFitness(population);
+        ArrayList<IndividualES> prevPopulation = null;
+        ArrayList<IndividualES> offspring = null;
+
+        do {
+            prevPopulation = population;
+            offspring = newGeneration(population);
+            population = replacePop(offspring, population);
+
+        } while (!hasConverged(population, prevPopulation));
+        //returns highest fit individual after convergence
+        return population.get(population.size() - 1).getNetwork();
+    }
+
+    private ArrayList<IndividualES> replacePop(ArrayList<IndividualES> offspring, ArrayList<IndividualES> prevGeneration) {
+        ArrayList<IndividualES> nextGeneration = new ArrayList<>();
+
+
+        while (nextGeneration.size() < Driver.populationSize) {
+
+            //if the fittest offspring is fitter than the fittest individual from prevGeneration,
+            //add offspring to nextGen and remove from offspring
+            if (offspring.get(offspring.size() - 1).getNetwork().getFitness() >= prevGeneration.get(offspring.size() - 1).getNetwork().getFitness()) {
+                nextGeneration.add(offspring.get(offspring.size() - 1));
+                offspring.remove(offspring.size() - 1);
+            } else {
+                nextGeneration.add(prevGeneration.get(prevGeneration.size() - 1));
+                prevGeneration.remove(prevGeneration.size() - 1);
+            }
+        }
+
+        return nextGeneration;
+
+    }
 
 }
