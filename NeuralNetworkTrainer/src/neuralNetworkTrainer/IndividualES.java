@@ -12,9 +12,11 @@ public class IndividualES implements Comparable {
 
     public IndividualES(boolean  initialPopulation){
         Random randNum = new Random();
+        strategyParams = new ArrayList<>();
         if(initialPopulation){
             this.network = new Network(true);
             genome = Network.serializeNetwork(this.network, false);
+
             for (ArrayList<Double> chromosome: genome){
                 ArrayList<Double> stratChrom = new ArrayList<>();
                 for (Double gene: chromosome ) {
@@ -43,6 +45,10 @@ public class IndividualES implements Comparable {
 
     public Network getNetwork() {
         return network;
+    }
+
+    public void setNetwork(Network network) {
+        this.network = network;
     }
 
     @Override
