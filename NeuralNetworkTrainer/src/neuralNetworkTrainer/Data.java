@@ -55,7 +55,12 @@ public abstract class Data {
     public ArrayList<ArrayList<Object>> getEvalDataSet(int size){
         ArrayList<ArrayList<Object>> evalSet = new ArrayList<>();
         if (size == 0){
-            size = dataPoints.size() / 10;
+            if(dataPoints.size() / 10 < 32){
+                size = 32;
+            }
+            else{
+                size = dataPoints.size() / 10;
+            }
         }
         for (int dataIter = 0; dataIter < size; dataIter++) {
             evalSet.add(dataPoints.get((int) (Math.random() * size)));

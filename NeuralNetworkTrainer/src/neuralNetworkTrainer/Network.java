@@ -48,8 +48,8 @@ class  Network implements Comparable {
 		// create output layer, these nodes use linear function for regression problem and sigmoidal for classification; they have no downstream nodes
 		for(int nodeIter = 0; nodeIter < Driver.configuration.get(Driver.configuration.size() - 1); nodeIter++){
 			if(Driver.isClassificationNetwork){
-//				this.outputLayer.getNodes().add(nodeIter, new Node(new SigmoidalFunction(), new ArrayList<Node>(), nodeIter));
-				this.outputLayer.getNodes().add(nodeIter, new Node(new LinearFunction(), new ArrayList<Node>(), nodeIter));
+				this.outputLayer.getNodes().add(nodeIter, new Node(new SigmoidalFunction(), new ArrayList<Node>(), nodeIter));
+//				this.outputLayer.getNodes().add(nodeIter, new Node(new LinearFunction(), new ArrayList<Node>(), nodeIter));
 			}
 
 			else{
@@ -182,7 +182,7 @@ class  Network implements Comparable {
 	 */
 	static Network deserializeToNetwork(ArrayList<ArrayList<Double>> weights){
 		
-		Network network = new Network(false);
+		Network network = new Network(true);
 		network.setWeights(weights, false);
 		return network;
 	}
@@ -260,9 +260,18 @@ class  Network implements Comparable {
 	public boolean evaluate(ArrayList<Object> inputs){
 
 		this.setInputs(inputs);
-		Object classifier = this.executeNodes();
-		boolean success = inputs.get(inputs.size() - 1) == classifier;
-		return (success);
+		ArrayList<Object> output = this.executeNodes();
+		double correctIndex = (double)inputs.get(inputs.size() - 1);
+		int largestValuedIndex = 0;
+		for(int outputIter = 1; outputIter < output.size(); outputIter++){
+			if((double)output.get(outputIter) > (double)output.get(largestValuedIndex)){
+				largestValuedIndex = outputIter;
+			}
+		}
+		if(largestValuedIndex == correctIndex){
+			return true;
+		}
+		return false;
 	}
 
 
@@ -327,9 +336,6 @@ class  Network implements Comparable {
 	}
 
 	@Override
-	public int compareTo(Object otherNetwork) {
-		return (int) (this.fitness - ((Network) otherNetwork).getFitness());
-	}
-
+	public int compareTo(Object otherNetwork) { return (int) ((this.fitness - ((Network) otherNetwork).getFitness()) * 10000); }
 }
 
