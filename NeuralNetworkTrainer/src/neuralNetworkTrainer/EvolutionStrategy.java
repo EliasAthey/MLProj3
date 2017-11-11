@@ -8,7 +8,7 @@ import java.util.Random;
 
 public class EvolutionStrategy extends TrainingAlgorithm {
 
-
+	private double mutOperator = .82;
 	private RouletteWheel rouletteWheel; //used to randomly select parents weighted by their rank
 	Random randNum = new Random();
 
@@ -20,7 +20,7 @@ public class EvolutionStrategy extends TrainingAlgorithm {
 		//create populationSize number of individuals and add them to population
 		for(int popIter = 0;  popIter < Driver.populationSize; popIter++) {
 
-			IndividualES individual = new IndividualES();
+			IndividualES individual = new IndividualES(true);
 			population.add(individual);
 		}
 		this.rouletteWheel = new RouletteWheel();
@@ -65,21 +65,111 @@ public class EvolutionStrategy extends TrainingAlgorithm {
 	}
 
 	// creates a List of boolean Lists that mirrors the dimensions and structure of
-	// an individual
-	// uses the list to randomly assign genes from parents to offspring
-	public ArrayList<ArrayList<ArrayList<Double>>> crossoverOffspring(ArrayList<ArrayList<Double>> parent1,
-			ArrayList<ArrayList<Double>> parent2) {
-		// TODO
-		return null;
+	// an individual and uses the list to randomly assign genes from parents to offspring
+	public ArrayList<IndividualES> crossoverOffspring(IndividualES parent1, IndividualES parent2) {
+
+		//List of boolean Lists to decide if offspring get their genes from parent1 or parent2
+		ArrayList<ArrayList<Boolean>> randomizer = new ArrayList<ArrayList<Boolean>>();
+
+		for (ArrayList<Double> chromosome: parent1.getGenome()) {
+
+			//a chromosome of random booleans that is the same length of the chromosomes of the parents and offspring
+			ArrayList<Boolean> randChrom = new ArrayList<Boolean>();
+
+			for (Double gene: chromosome) {
+				//fill every randChrom with random booleans
+				randChrom.add(this.randNum.nextBoolean());
+			}
+			randomizer.add(randChrom);
+		}
+
+		//make offspring
+		IndividualES offspring1 = new IndividualES(false);
+		IndividualES offspring2 = new IndividualES(false);
+
+
+		ArrayList<ArrayList<Double>> genomeOffspring1 = new ArrayList<>();
+		ArrayList<ArrayList<Double>> genomeOffspring2 = new ArrayList<>();
+		ArrayList<ArrayList<Double>> stratParamsOffspring1 = new ArrayList<>();
+		ArrayList<ArrayList<Double>> stratParamsOffspring2 = new ArrayList<>();
+
+		//randomizer selects which offspring gets which gene
+		for(int chromIter = 0; chromIter < parent1.getGenome().size(); chromIter++) {
+			genomeOffspring1.add(new ArrayList<>());
+			genomeOffspring2.add(new ArrayList<>());
+			stratParamsOffspring1.add(new ArrayList<>());
+			stratParamsOffspring2.add(new ArrayList<>());
+
+			for(int geneIter = 0; geneIter < parent1.getGenome().get(0).size(); geneIter++) {
+
+				if (randomizer.get(chromIter).get(geneIter)) {//give the double from parent1 to offspring1 and p2 to offspring2
+					genomeOffspring1.get(chromIter).add(parent1.getGenome().get(chromIter).get(geneIter));
+					genomeOffspring2.get(chromIter).add(parent2.getGenome().get(chromIter).get(geneIter));
+
+					//combine strategy parameters from both parents such that one parent s weighted more than the other
+					stratParamsOffspring1.get(chromIter).add((parent1.getStrategyParams().get(chromIter).get(geneIter)));
+					stratParamsOffspring2.get(chromIter).add((parent2.getStrategyParams().get(chromIter).get(geneIter)));
+				}
+
+				else {//flip which offspring get which gene
+					genomeOffspring1.get(chromIter).add(parent2.getGenome().get(chromIter).get(geneIter));
+					genomeOffspring2.get(chromIter).add(parent1.getGenome().get(chromIter).get(geneIter));
+
+					stratParamsOffspring1.get(chromIter).add((parent2.getStrategyParams().get(chromIter).get(geneIter)));
+					stratParamsOffspring2.get(chromIter).add((parent1.getStrategyParams().get(chromIter).get(geneIter)));
+				}
+			}
+		}
+		//add the genomes and the stratParams to the offspring
+		offspring1.setGenome(genomeOffspring1);
+		offspring2.setGenome(genomeOffspring2);
+		offspring1.setStrategyParams(stratParamsOffspring1);
+		offspring2.setStrategyParams(stratParamsOffspring2);
+
+		//create the offspring pair that will be returned
+		ArrayList<IndividualES> offspringPair = new ArrayList<>();
+		offspringPair.add(offspring2);
+		offspringPair.add(offspring1);
+		return offspringPair;
 	}
 
 	// for any number of offspring:
 	// look at every Double and with a Driver.mutationRate chance
 	// change that value by getting a random gaussian distributed number centered at
 	// 0 with a standard deviation of 1
-	public ArrayList<ArrayList<ArrayList<Double>>> mutateOffspring(ArrayList<ArrayList<ArrayList<Double>>> offspring) {
+	public ArrayList<IndividualES> mutateOffspring(ArrayList<IndividualES> offspring) {
 
 		// TODO
+		for (IndividualES individual: offspring) {
+			//1/5th rule, best individuals mutate less
+			if (offspring.indexOf(individual) >= ( this.mutOperator * offspring.size())){
+				for (ArrayList<Double> chromosome: individual.getGenome()) {
+					for (Double gene: chromosome){
+						if( randNum.nextDouble() <= Driver.mutationRate){
+							gene += individual.getStrategyParams()							//gets strategy parameter associated with the current gene
+									.get(individual.getGenome().indexOf(chromosome))		//and uses it as a standard deviation for a random gaussian number
+									.get(chromosome.indexOf(gene)) * randNum.nextGaussian();//that is used to mutate the gene
+						}
+
+					}
+				}
+			}
+			else{
+				//worse individuals mutate more
+				if (offspring.indexOf(individual) >= ( this.mutOperator * offspring.size())){
+					for (ArrayList<Double> chromosome: individual.getGenome()) {
+						for (Double gene: chromosome){
+							if( randNum.nextDouble() <= (Driver.mutationRate * 2) ){			//2 times as likely to mutate with 1.5 * greater deviation
+								gene += individual.getStrategyParams()							//gets strategy parameter associated with the current gene
+										.get(individual.getGenome().indexOf(chromosome))		//and uses it as a standard deviation for a random gaussian number
+										.get(chromosome.indexOf(gene)) * randNum.nextGaussian() *1.5;//that is used to mutate the gene
+							}
+
+						}
+					}
+				}
+			}
+		}
 		return null;
 	}
 
@@ -114,7 +204,7 @@ public class EvolutionStrategy extends TrainingAlgorithm {
 
 	@Override
 	Network train() {
-
+		//eval fitness of offspring before mutation--------------
 
 		ArrayList<IndividualES> population = generatePopulation();
 		population = evalFitness(population);
