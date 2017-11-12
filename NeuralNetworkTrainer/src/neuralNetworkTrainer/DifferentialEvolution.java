@@ -146,7 +146,7 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 
 			// iterate through each weight, randomly (uniformly) swap p1 weight with p2 weight
 			for(int weightIter = 0; weightIter < p1.get(nodeIter).size(); weightIter++){
-				if(Math.random() < 0.5){
+				if(Math.random() < Driver.mutationRate){
 					p1.get(nodeIter).remove(weightIter);
 					p1.get(nodeIter).add(weightIter, p2.get(nodeIter).get(weightIter));
 				}
@@ -182,11 +182,11 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 	//converts matrixes into networks for fitness evaluation
 	public ArrayList<Network>  deserializePopulation (ArrayList<ArrayList<ArrayList<Double>>> population) {
 		ArrayList<Network> deserializedPopulation = new ArrayList<>();
-		
+
 		for (ArrayList<ArrayList<Double>> individual : population) {
 			deserializedPopulation.add(Network.deserializeToNetwork(individual));
 		}
-		
+
 		return deserializedPopulation;
 	}
 
@@ -195,14 +195,14 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 	 * @param population a population of networks
 	 * @return a population of ArrayList<ArrayList<ArrayList<Double>>>
 	 */
-	//converts networks into matrixes for reproduction 
+	//converts networks into matrixes for reproduction
 	public ArrayList<ArrayList<ArrayList<Double>>> serializePopulation( ArrayList<Network> population){
 		ArrayList<ArrayList<ArrayList<Double>>> serializedPopulation = new ArrayList<>();
-		
+
 		for (Network individual : population) {
 			serializedPopulation.add(Network.serializeNetwork(individual, false));
 		}
-		
+
 		return serializedPopulation;
 	}
 
@@ -233,7 +233,7 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 	 */
 	private ArrayList<Network> evalFitness(ArrayList<Network> population){
 
-		ArrayList<ArrayList<Object>> evalSet = Driver.dataset.getEvalDataSet2(100);
+		ArrayList<ArrayList<Object>> evalSet = Driver.dataset.getEvalDataSet(0);
 
 		for(Network individual: population) {
 			double fitness = 0;
@@ -245,7 +245,6 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 			}
 
 			fitness = fitness/evalSet.size();
-			System.out.println(fitness);
 			individual.setFitness(fitness);
 		}
 

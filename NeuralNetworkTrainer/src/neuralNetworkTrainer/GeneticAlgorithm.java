@@ -192,8 +192,25 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
         return population;
     }
 
-    public Boolean hasConverged(ArrayList<Network> currentPopulation, ArrayList<Network> prevPopulation) {
-        return false;
+    public Boolean hasConverged(ArrayList<Network> currPop, ArrayList<Network> prevPop) {
+        if (this.gencounter < 200){
+            return false;
+
+        }
+
+        Network bestPrevNetwork = this.evalFitness(prevPop).get(prevPop.size() - 1);
+        Network bestCurrNetwork = this.evalFitness(currPop).get(currPop.size() - 1);
+
+        ArrayList<ArrayList<Double>> bestPrevWeights = Network.serializeNetwork(bestPrevNetwork, false);
+        ArrayList<ArrayList<Double>> bestCurrWeights = Network.serializeNetwork(bestCurrNetwork, false);
+        for(int nodeIter = 0; nodeIter < bestPrevWeights.size(); nodeIter++){
+            for(int weightIter =0; weightIter < bestPrevWeights.get(nodeIter).size(); weightIter++){
+                if(bestPrevWeights.get(nodeIter).get(weightIter) !=  bestCurrWeights.get(nodeIter).get(weightIter)){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
 

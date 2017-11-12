@@ -240,12 +240,20 @@ public class EvolutionStrategy extends TrainingAlgorithm {
     }
 
 
-    public Boolean hasConverged(ArrayList<IndividualES> currentPopulation, ArrayList<IndividualES> prevPopulation) {
-        if (prevPopulation == null) {
+    public Boolean hasConverged(ArrayList<IndividualES> currPop, ArrayList<IndividualES> prevPop) {
+        if (this.gencounter < 200){
             return false;
         }
-        // TODO
-        return false;
+        ArrayList<ArrayList<Double>> bestPrevWeights = prevPop.get(prevPop.size() -1).getGenome();
+        ArrayList<ArrayList<Double>> bestCurrWeights = currPop.get(currPop.size() - 1).getGenome();
+        for(int nodeIter = 0; nodeIter < bestPrevWeights.size(); nodeIter++){
+            for(int weightIter =0; weightIter < bestPrevWeights.get(nodeIter).size(); weightIter++){
+                if(bestPrevWeights.get(nodeIter).get(weightIter) !=  bestCurrWeights.get(nodeIter).get(weightIter)){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     @Override
@@ -289,8 +297,6 @@ public class EvolutionStrategy extends TrainingAlgorithm {
 
             nextGeneration.add(mostFit);
         }
-
-        Collections.sort(nextGeneration);
 
         Collections.sort(nextGeneration);
         System.out.println("new gen best = " + nextGeneration.get(nextGeneration.size()-1).getNetwork().getFitness());
