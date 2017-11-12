@@ -215,7 +215,7 @@ public class EvolutionStrategy extends TrainingAlgorithm {
     // evaluated the fitness of the population
     public ArrayList<IndividualES> evalFitness(ArrayList<IndividualES> population) {
 
-        ArrayList<ArrayList<Object>> evalSet = Driver.dataset.getEvalDataSet2(1);
+        ArrayList<ArrayList<Object>> evalSet = Driver.dataset.getEvalDataSet2(50);
 
         for (IndividualES individual : population) {
             double fitness = 0;
@@ -229,23 +229,22 @@ public class EvolutionStrategy extends TrainingAlgorithm {
             fitness = (fitness / evalSet.size()) ;
             individual.getNetwork().setFitness(fitness);
         }
-        System.out.println("===========================");
+        //System.out.println("===========================");
 
         Collections.sort(population);
-        System.out.println("Generation " + gencounter);
-        Double best = population.get(population.size() - 1).getNetwork().getFitness();
-        Double worst = population.get(0).getNetwork().getFitness();
-        System.out.println("best = " +best+ "\tworst = " + worst );
+        //System.out.println("Generation " + gencounter);
+        //Double best = population.get(population.size() - 1).getNetwork().getFitness();
+        //Double worst = population.get(0).getNetwork().getFitness();
+        //System.out.println("best = " +best+ "\tworst = " + worst );
         return population;
     }
 
 
-    public Boolean hasConverged(ArrayList<IndividualES> currentPopulation, ArrayList<IndividualES> prevPopulation) {
-        if (prevPopulation == null) {
+    public Boolean hasConverged(ArrayList<IndividualES> currPop, ArrayList<IndividualES> prevPop) {
+        if (this.gencounter < 200){
             return false;
         }
-        // TODO
-        return false;
+        return true;
     }
 
     @Override
@@ -291,9 +290,7 @@ public class EvolutionStrategy extends TrainingAlgorithm {
         }
 
         Collections.sort(nextGeneration);
-
-        Collections.sort(nextGeneration);
-        System.out.println("new gen best = " + nextGeneration.get(nextGeneration.size()-1).getNetwork().getFitness());
+        System.out.println("Current best percent error: " +  (1 - nextGeneration.get(nextGeneration.size()-1).getNetwork().getFitness()));
         return nextGeneration;
 
     }
