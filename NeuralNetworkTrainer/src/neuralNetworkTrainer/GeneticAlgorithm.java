@@ -181,13 +181,13 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
             fitness = fitness / evalSet.size();
             individual.setFitness(fitness);
         }
-        System.out.println("-------------------");
+//        System.out.println("-------------------");
 
         Collections.sort(population);
         gencounter++;
-        System.out.println(gencounter);
+//        System.out.println(gencounter);
         Double best = population.get(population.size() - 1).getFitness();
-		System.out.println(gencounter+ "," + best);
+//		System.out.println(gencounter+ "," + best);
 		//Double worst = population.get(0).getFitness();
         //System.out.println("best = " + best + "\tworst = " + worst);
         return population;
@@ -249,7 +249,7 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
         if (best.getFitness() >= this.bestNet.getFitness()) {
             this.bestNet = new Network(best);
         }
-        System.out.println("new gen best = " + nextGeneration.get(nextGeneration.size() - 1).getFitness());
+        System.out.println("Current best percent error: " + (1 - nextGeneration.get(nextGeneration.size() - 1).getFitness()));
         return nextGeneration;
 
     }

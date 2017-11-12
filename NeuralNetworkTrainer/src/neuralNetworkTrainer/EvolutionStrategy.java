@@ -290,7 +290,7 @@ public class EvolutionStrategy extends TrainingAlgorithm {
         }
 
         Collections.sort(nextGeneration);
-        System.out.println("new gen best = " + nextGeneration.get(nextGeneration.size()-1).getNetwork().getFitness());
+        System.out.println("Current best percent error: " +  (1 - nextGeneration.get(nextGeneration.size()-1).getNetwork().getFitness()));
         return nextGeneration;
 
     }
