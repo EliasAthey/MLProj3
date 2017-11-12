@@ -151,8 +151,10 @@ class Driver {
 				}
 			}
 			System.out.println("Starting training...\n");
+			double start = System.currentTimeMillis();
 			Driver.train();
-			System.out.println("Training Complete\n");
+			double time = System.currentTimeMillis() - start;
+			System.out.println("Training Completed in " + time + " ms\n");
 		}
 	}
 	
