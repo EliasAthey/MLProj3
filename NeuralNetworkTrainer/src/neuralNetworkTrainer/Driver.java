@@ -73,9 +73,9 @@ class Driver {
 			// set default values for all optional parameters
 			Driver.learningRate = 0.01;
 			Driver.momentum = 0.5;
-			Driver.populationSize = 32;
-			Driver.numberOffspring = 50;
-			Driver.mutationRate = 0.01;
+			Driver.populationSize = 25;
+			Driver.numberOffspring = 100;
+			Driver.mutationRate = 0.05;
 			Driver.beta = 0.1;
 
 			// check for any additional options (parameters), set accordingly

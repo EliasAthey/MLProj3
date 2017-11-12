@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * @author Elias
  *
  */
-class  Network implements Comparable {
+class  Network implements Comparable<Network> {
 
 	/**
 	 * The input layer
@@ -32,6 +32,17 @@ class  Network implements Comparable {
 	 * The fitness of this network
 	 */
 	private double fitness;
+
+
+	/**
+	 * Constructs a network clone based off another Network
+	 */
+	Network(Network clone){
+		this.inputLayer = clone.inputLayer;
+		this.outputLayer = clone.outputLayer;
+		this.hiddenLayers = clone.hiddenLayers;
+		this.fitness = clone.fitness;
+	}
 
 	/**
 	 * Constructs a network based off the configuration in the Driver
@@ -335,7 +346,20 @@ class  Network implements Comparable {
 		this.fitness = fitness;
 	}
 
+	//@Override
+	//public int compareTo(Object otherNetwork) { return (int) ((this.fitness - ((Network) otherNetwork).getFitness()) * 10000); }
+
+
 	@Override
-	public int compareTo(Object otherNetwork) { return (int) ((this.fitness - ((Network) otherNetwork).getFitness()) * 10000); }
+	public int compareTo(Network other) {
+
+		if (this.getFitness() < other.getFitness()) {
+			return -1;
+		} else if (this.getFitness() > other.getFitness()) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
 }
 

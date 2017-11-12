@@ -62,8 +62,28 @@ public abstract class Data {
                 size = dataPoints.size() / 10;
             }
         }
+        if (size == -1){
+            size = dataPoints.size();
+        }
         for (int dataIter = 0; dataIter < size; dataIter++) {
             evalSet.add(dataPoints.get((int) (Math.random() * size)));
+        }
+        return evalSet;
+
+    }
+    /**
+     * Gets a subset of the data used for evaluation -- via propapility
+     * @param percent of the data set to use
+     * @return data to be used in fitness evaluation
+     */
+    public ArrayList<ArrayList<Object>> getEvalDataSet2(double percent){
+        ArrayList<ArrayList<Object>> evalSet = new ArrayList<>();
+        for (int dataIter = 0; dataIter < dataPoints.size(); dataIter++) {
+            if(Math.random() <= percent){
+                evalSet.add(dataPoints.get(dataIter));
+
+            }
+
         }
         return evalSet;
 
