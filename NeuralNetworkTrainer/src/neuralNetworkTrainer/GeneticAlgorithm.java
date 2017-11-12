@@ -185,33 +185,21 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 
         Collections.sort(population);
         gencounter++;
-        System.out.println("Generation " + gencounter);
+        System.out.println(gencounter);
         Double best = population.get(population.size() - 1).getFitness();
-        Double worst = population.get(0).getFitness();
-        System.out.println("best = " + best + "\tworst = " + worst);
+		System.out.println(gencounter+ "," + best);
+		//Double worst = population.get(0).getFitness();
+        //System.out.println("best = " + best + "\tworst = " + worst);
         return population;
     }
 
-    public Boolean hasConverged(ArrayList<Network> currPop, ArrayList<Network> prevPop) {
-        if (this.gencounter < 200){
-            return false;
 
-        }
-
-        Network bestPrevNetwork = this.evalFitness(prevPop).get(prevPop.size() - 1);
-        Network bestCurrNetwork = this.evalFitness(currPop).get(currPop.size() - 1);
-
-        ArrayList<ArrayList<Double>> bestPrevWeights = Network.serializeNetwork(bestPrevNetwork, false);
-        ArrayList<ArrayList<Double>> bestCurrWeights = Network.serializeNetwork(bestCurrNetwork, false);
-        for(int nodeIter = 0; nodeIter < bestPrevWeights.size(); nodeIter++){
-            for(int weightIter =0; weightIter < bestPrevWeights.get(nodeIter).size(); weightIter++){
-                if(bestPrevWeights.get(nodeIter).get(weightIter) !=  bestCurrWeights.get(nodeIter).get(weightIter)){
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
+	public Boolean hasConverged() {
+		if (this.gencounter < 200){
+			return false;
+		}
+		return true;
+	}
 
 
     @Override
@@ -225,7 +213,7 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
         ArrayList<Network> population = generatePopulation();
         population = evalFitness(population);
 
-        while (!hasConverged(population, prevPopulation)) {
+        while (!hasConverged()) {
             serializedPopulation = serializePopulation(population);
             serializedOffspring = newGeneration(serializedPopulation);
             offspring = deserializePopulation(serializedOffspring);

@@ -22,6 +22,7 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 	 * The current iteration's error rate of the best individual
 	 */
 	private double currentPercentError = 1.0;
+	private int gencounter = 0;
 
 	/**
 	 * Keep creating new generations until convergence
@@ -38,7 +39,7 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 			this.currentPercentError = 1 - this.currentPopulation.get(0).getFitness();
 			System.out.println("Current best percent error: " + this.currentPercentError);
 
-		}while( this.currentPercentError != 0.0 && !this.hasConverged(this.previousPopulation, this.currentPopulation));
+		}while( this.currentPercentError != 0.0 && !this.hasConverged());
 
 		this.evalFitness(this.currentPopulation);
 		return this.currentPopulation.get(this.currentPopulation.size() - 1);
@@ -210,18 +211,10 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 	 * Checks convergence
 	 * @return true if the populations have converged, false otherwise
 	 */
-	public Boolean hasConverged(ArrayList<Network> prevPop, ArrayList<Network> currPop) {
-		Network bestPrevNetwork = this.evalFitness(prevPop).get(prevPop.size() - 1);
-		Network bestCurrNetwork = this.evalFitness(currPop).get(currPop.size() - 1);
-
-		ArrayList<ArrayList<Double>> bestPrevWeights = Network.serializeNetwork(bestPrevNetwork, false);
-		ArrayList<ArrayList<Double>> bestCurrWeights = Network.serializeNetwork(bestCurrNetwork, false);
-		for(int nodeIter = 0; nodeIter < bestPrevWeights.size(); nodeIter++){
-			for(int weightIter =0; weightIter < bestPrevWeights.get(nodeIter).size(); weightIter++){
-				if(bestPrevWeights.get(nodeIter).get(weightIter) !=  bestCurrWeights.get(nodeIter).get(weightIter)){
-					return false;
-				}
-			}
+	public Boolean hasConverged() {
+		this.gencounter++;
+		if (this.gencounter < 200){
+			return false;
 		}
 		return true;
 	}

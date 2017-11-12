@@ -215,7 +215,7 @@ public class EvolutionStrategy extends TrainingAlgorithm {
     // evaluated the fitness of the population
     public ArrayList<IndividualES> evalFitness(ArrayList<IndividualES> population) {
 
-        ArrayList<ArrayList<Object>> evalSet = Driver.dataset.getEvalDataSet2(1);
+        ArrayList<ArrayList<Object>> evalSet = Driver.dataset.getEvalDataSet2(50);
 
         for (IndividualES individual : population) {
             double fitness = 0;
@@ -229,13 +229,13 @@ public class EvolutionStrategy extends TrainingAlgorithm {
             fitness = (fitness / evalSet.size()) ;
             individual.getNetwork().setFitness(fitness);
         }
-        System.out.println("===========================");
+        //System.out.println("===========================");
 
         Collections.sort(population);
-        System.out.println("Generation " + gencounter);
-        Double best = population.get(population.size() - 1).getNetwork().getFitness();
-        Double worst = population.get(0).getNetwork().getFitness();
-        System.out.println("best = " +best+ "\tworst = " + worst );
+        //System.out.println("Generation " + gencounter);
+        //Double best = population.get(population.size() - 1).getNetwork().getFitness();
+        //Double worst = population.get(0).getNetwork().getFitness();
+        //System.out.println("best = " +best+ "\tworst = " + worst );
         return population;
     }
 
@@ -243,15 +243,6 @@ public class EvolutionStrategy extends TrainingAlgorithm {
     public Boolean hasConverged(ArrayList<IndividualES> currPop, ArrayList<IndividualES> prevPop) {
         if (this.gencounter < 200){
             return false;
-        }
-        ArrayList<ArrayList<Double>> bestPrevWeights = prevPop.get(prevPop.size() -1).getGenome();
-        ArrayList<ArrayList<Double>> bestCurrWeights = currPop.get(currPop.size() - 1).getGenome();
-        for(int nodeIter = 0; nodeIter < bestPrevWeights.size(); nodeIter++){
-            for(int weightIter =0; weightIter < bestPrevWeights.get(nodeIter).size(); weightIter++){
-                if(bestPrevWeights.get(nodeIter).get(weightIter) !=  bestCurrWeights.get(nodeIter).get(weightIter)){
-                    return false;
-                }
-            }
         }
         return true;
     }
