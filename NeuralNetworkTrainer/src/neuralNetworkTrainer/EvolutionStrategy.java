@@ -28,7 +28,7 @@ public class EvolutionStrategy extends TrainingAlgorithm {
             population.add(individual);
         }
         this.rouletteWheel = new RouletteWheel();
-        Collections.sort(population);
+        //Collections.sort(population);
         return population;
     }
 
@@ -113,7 +113,12 @@ public class EvolutionStrategy extends TrainingAlgorithm {
         //randomizer selects which offspring gets which gene
         for (int chromIter = 0; chromIter < parent1.getGenome().size(); chromIter++) {
 
-            for (int geneIter = 0; geneIter < parent1.getGenome().get(0).size(); geneIter++) {
+            chromosomeO1.clear();
+            chromosomeO2.clear();
+            stratChromosomeO1.clear();
+            stratChromosomeO2.clear();
+
+            for (int geneIter = 0; geneIter < parent1.getGenome().get(chromIter).size(); geneIter++) {
 
                 if (randomizer.get(chromIter).get(geneIter)) {//give the double from parent1 to offspring1 and p2 to offspring2
                     chromosomeO1.add(parent1.getGenome().get(chromIter).get(geneIter));
@@ -129,6 +134,12 @@ public class EvolutionStrategy extends TrainingAlgorithm {
                     stratChromosomeO2.add((parent1.getStrategyParams().get(chromIter).get(geneIter)));
                 }
             }
+
+            genomeOffspring1.add(new ArrayList<>(chromosomeO1));
+            genomeOffspring2.add(new ArrayList<>(chromosomeO2));
+            stratParamsOffspring1.add(new ArrayList<>(stratChromosomeO1));
+            stratParamsOffspring2.add(new ArrayList<>(stratChromosomeO2));
+
         }
         //add the genomes and the stratParams to the offspring
         offspring1.setGenome(genomeOffspring1);
@@ -204,7 +215,7 @@ public class EvolutionStrategy extends TrainingAlgorithm {
     // evaluated the fitness of the population
     public ArrayList<IndividualES> evalFitness(ArrayList<IndividualES> population) {
 
-        ArrayList<ArrayList<Object>> evalSet = Driver.dataset.getEvalDataSet(50);
+        ArrayList<ArrayList<Object>> evalSet = Driver.dataset.getEvalDataSet2(1);
 
         for (IndividualES individual : population) {
             double fitness = 0;
@@ -215,16 +226,16 @@ public class EvolutionStrategy extends TrainingAlgorithm {
                 }
             }
 
-            fitness = fitness / evalSet.size();
+            fitness = (fitness / evalSet.size()) ;
             individual.getNetwork().setFitness(fitness);
         }
+        System.out.println("===========================");
 
-        //sorts population based on fitness
         Collections.sort(population);
-        double best = population.get(population.size() - 1).getNetwork().getFitness();
-        double worst = population.get(0).getNetwork().getFitness();
         System.out.println("Generation " + gencounter);
-        System.out.println(" best = " + best + "\tworst = " + worst);
+        Double best = population.get(population.size() - 1).getNetwork().getFitness();
+        Double worst = population.get(0).getNetwork().getFitness();
+        System.out.println("best = " +best+ "\tworst = " + worst );
         return population;
     }
 
@@ -249,30 +260,40 @@ public class EvolutionStrategy extends TrainingAlgorithm {
             gencounter++;
             prevPopulation = population;
             offspring = newGeneration(population);
-            population = replacePop(offspring, population);
+            population = new ArrayList<>(replacePop(offspring, population));
 
         } while (!hasConverged(population, prevPopulation));
         //returns highest fit individual after convergence
         return population.get(population.size() - 1).getNetwork();
     }
 
+
+
+
+
     private ArrayList<IndividualES> replacePop(ArrayList<IndividualES> offspring, ArrayList<IndividualES> prevGeneration) {
+
+
         ArrayList<IndividualES> nextGeneration = new ArrayList<>();
-
-
+        IndividualES mostFit = null;
         while (nextGeneration.size() < Driver.populationSize) {
 
-            //if the fittest offspring is fitter than the fittest individual from prevGeneration,
-            //add offspring to nextGen and remove from offspring
-            if (offspring.get(offspring.size() - 1).getNetwork().getFitness() >= prevGeneration.get(prevGeneration.size() - 1).getNetwork().getFitness()) {
-                nextGeneration.add(offspring.get(offspring.size() - 1));
-                offspring.remove(offspring.size() - 1);
-            } else {
-                nextGeneration.add(prevGeneration.get(prevGeneration.size() - 1));
-                prevGeneration.remove(prevGeneration.size() - 1);
+            int comparator = offspring.get(offspring.size() - 1).compareTo(prevGeneration.get(prevGeneration.size() - 1));
+
+            if (comparator >= 0) {
+                mostFit = new IndividualES(offspring.get(offspring.size() - 1));
+
+            } else if (comparator == -1) {
+                mostFit = new IndividualES(prevGeneration.get(prevGeneration.size() - 1));
             }
+
+            nextGeneration.add(mostFit);
         }
 
+        Collections.sort(nextGeneration);
+
+        Collections.sort(nextGeneration);
+        System.out.println("new gen best = " + nextGeneration.get(nextGeneration.size()-1).getNetwork().getFitness());
         return nextGeneration;
 
     }
