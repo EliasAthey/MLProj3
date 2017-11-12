@@ -1,14 +1,15 @@
 package neuralNetworkTrainer;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.ListIterator;
-import java.util.Random;
+import sun.nio.ch.Net;
+
+import java.util.*;
 
 public class GeneticAlgorithm extends TrainingAlgorithm {
 
+    public int gencounter = 0;
     RouletteWheel rouletteWheel; //used to randomly select parents weighted by their rank
     ArrayList<ArrayList<Double>> geneStandardDev; //holds standardDev of all genes
+    Network bestNet;
     Random randNum = new Random();
 
     public ArrayList<Network> generatePopulation() {
@@ -23,6 +24,7 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
             population.add(individual);
         }
         this.rouletteWheel = new RouletteWheel();
+        this.bestNet = population.get(0);
         return population;
     }
 
@@ -30,36 +32,113 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
     public void setGeneStDev(ArrayList<ArrayList<ArrayList<Double>>> population) {
         this.geneStandardDev = new ArrayList<>();
 
+        ArrayList<ArrayList<Double>> geneMeans = new ArrayList<>();
+        ArrayList<ArrayList<ArrayList<Double>>> squaredDiffs = new ArrayList<>();
+        ArrayList<ArrayList<Double>> geneSums = new ArrayList<>();
+        ArrayList<ArrayList<Integer>> geneDenoms = new ArrayList<>();
+
+
         for (int chromIter = 0; chromIter < population.get(0).size(); chromIter++) {
-            ArrayList<Double> chromosome = new ArrayList<>();
-            this.geneStandardDev.add(chromosome);
+            ArrayList<Double> sumChrom = new ArrayList<>();
+            ArrayList<Integer> denomChrom = new ArrayList<>();
+            ArrayList<Double> meanChrom = new ArrayList<>();
+            geneSums.add(sumChrom);
+            geneDenoms.add(denomChrom);
+            geneMeans.add(meanChrom);
+        }
 
-            for (int geneIter = 0; geneIter < population.get(chromIter).get(0).size(); geneIter++) {
-                //find mean of a gene
-                double geneMean = 0;
-                ArrayList<Double> geneValues = new ArrayList<Double>();
-                for (int individualIter = 0; individualIter < population.size(); individualIter++) {
-                    geneMean += population.get(individualIter).get(chromIter).get(geneIter);
-                    //record the value of each gene
-                    geneValues.add(population.get(individualIter).get(chromIter).get(geneIter));
+        //init all values to 0
+           for (int chromIter = 0; chromIter < population.get(0).size(); chromIter++) {
+                for (int geneIter = 0; geneIter < population.get(0).get(chromIter).size(); geneIter++) {
+                    geneSums.get(chromIter).add(0.);
+                    geneDenoms.get(chromIter).add(0);
+                    geneMeans.get(chromIter).add(0.);
                 }
-                //calc mean
-                geneMean = geneMean / (double) population.size();
-                double squareDistSum = 0;
-                //sum squared distance from mean to geneValues
-                for (Double geneVal : geneValues) {
-                    squareDistSum += ((geneMean - geneVal) * (geneMean - geneVal));
-                }
-                //divide by number of data points -1
-                double meanSquareDist = squareDistSum / (double) population.size();
-                double stdev = Math.sqrt(meanSquareDist);
-
-                this.geneStandardDev.get(chromIter).add(stdev);
-
             }
 
+        //fill sums and denominators
+        for (int indIter = 0; indIter < population.size(); indIter++) {
+            for (int chromIter = 0; chromIter < population.get(indIter).size(); chromIter++) {
+                for (int geneIter = 0; geneIter < population.get(indIter).get(chromIter).size(); geneIter++) {
+                    geneSums.get(chromIter).set(geneIter, (geneSums.get(chromIter).get(geneIter) + population.get(indIter).get(chromIter).get(geneIter)));
+                    geneDenoms.get(chromIter).set(geneIter, (geneDenoms.get(chromIter).get(geneIter) + 1));
+                }
+            }
         }
+        //fill geneMeans
+        for (int chromIter = 0; chromIter < geneSums.size(); chromIter++) {
+            for (int geneIter = 0; geneIter < geneSums.get(chromIter).size(); geneIter++) {
+                geneMeans.get(chromIter).set(geneIter,
+                        geneSums.get(chromIter).get(geneIter)/geneDenoms.get(chromIter).get(geneIter));
+            }
+        }
+
+
+        //find square diffs with mean for every gene
+        for (int indIter = 0; indIter < population.size(); indIter++) {
+            ArrayList<ArrayList<Double>> sqDiffInd = new ArrayList<>();
+
+            for (int chromIter = 0; chromIter < population.get(indIter).size(); chromIter++) {
+                ArrayList<Double> sqDiffChrom= new ArrayList<>();
+
+                for (int geneIter = 0; geneIter < population.get(indIter).get(chromIter).size(); geneIter++) {
+                    double diff = population.get(indIter).get(chromIter).get(geneIter) - geneMeans.get(chromIter).get(geneIter);
+                    sqDiffChrom.add(diff*diff);
+                }
+                sqDiffInd.add(sqDiffChrom);
+            }
+            squaredDiffs.add(sqDiffInd);
+        }
+
+
+
+
+
     }
+
+    //create gene matrix
+    //
+
+//
+//
+//        for(
+//    int chromIter = 0; chromIter<population.get(0).
+//
+//    size();
+//
+//    chromIter++)
+//
+//    {
+//        ArrayList<Double> chromosome = new ArrayList<>();
+//        this.geneStandardDev.add(chromosome);
+//
+//        for (int geneIter = 0; geneIter < population.get(chromIter).get(0).size(); geneIter++) {
+//            //find mean of a gene
+//            double geneMean = 0;
+//            ArrayList<Double> geneValues = new ArrayList<Double>();
+//            for (int individualIter = 0; individualIter < population.size(); individualIter++) {
+//                geneMean += population.get(individualIter).get(chromIter).get(geneIter);
+//                //record the value of each gene
+//                geneValues.add(population.get(individualIter).get(chromIter).get(geneIter));
+//            }
+//            //calc mean
+//            geneMean = geneMean / (double) population.size();
+//            double squareDistSum = 0;
+//            //sum squared distance from mean to geneValues
+//            for (Double geneVal : geneValues) {
+//                squareDistSum += ((geneMean - geneVal) * (geneMean - geneVal));
+//            }
+//            //divide by number of data points -1
+//            double meanSquareDist = squareDistSum / (double) population.size();
+//            double stdev = Math.sqrt(meanSquareDist);
+//
+//            this.geneStandardDev.get(chromIter).add(stdev);
+//
+//        }
+//
+//    }
+//
+//}
 
     //converts matrixes into networks for fitness evaluation
     public ArrayList<Network> deserializePopulation(ArrayList<ArrayList<ArrayList<Double>>> population) {
@@ -199,7 +278,7 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
      */
     public ArrayList<Network> evalFitness(ArrayList<Network> population) {
 
-        ArrayList<ArrayList<Object>> evalSet = Driver.dataset.getEvalDataSet(0);
+        ArrayList<ArrayList<Object>> evalSet = Driver.dataset.getEvalDataSet2(.5);
 
         for (Network individual : population) {
             double fitness = 0;
@@ -212,10 +291,17 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
 
             fitness = fitness / evalSet.size();
             individual.setFitness(fitness);
+            //ystem.out.println(fitness);
         }
+        System.out.println("-------------------");
 
         //sorts population based on fitness
         Collections.sort(population);
+        gencounter++;
+        System.out.println("Generation " + gencounter);
+        Double best = population.get(population.size() - 1).getFitness();
+        Double worst = population.get(0).getFitness();
+        System.out.println("best = " + best + "\tworst = " + worst);
         return population;
     }
 
@@ -243,27 +329,38 @@ public class GeneticAlgorithm extends TrainingAlgorithm {
             offspring = evalFitness(offspring);
             prevPopulation = population;
             population = replacePop(offspring, population);
-            System.out.println(population.get(0).getFitness());
+            //System.out.println(population.get(0).getFitness());
 
         }
         //returns highest fit individual after convergence
-        return population.get(population.size() - 1);
+        return this.bestNet;
     }
+
 
     private ArrayList<Network> replacePop(ArrayList<Network> offspring, ArrayList<Network> prevGeneration) {
         ArrayList<Network> nextGeneration = new ArrayList<>();
+        Network mostFit = null;
         while (nextGeneration.size() < Driver.populationSize) {
 
-            //if the fittest offspring is fitter than the fittest individual from prevGeneration,
-            //add offspring to nextGen and remove from offspring
-            if (offspring.get(offspring.size() - 1).getFitness() >= prevGeneration.get(prevGeneration.size() - 1).getFitness()) {
-                nextGeneration.add(offspring.get(offspring.size() - 1));
-                offspring.remove(offspring.size() - 1);
-            } else {
-                nextGeneration.add(prevGeneration.get(prevGeneration.size() - 1));
-                prevGeneration.remove(prevGeneration.size() - 1);
+            int comparator = offspring.get(offspring.size() - 1).compareTo(prevGeneration.get(prevGeneration.size() - 1));
+
+            if (comparator >= 0) {
+                mostFit = new Network(offspring.get(offspring.size() - 1));
+
+            } else if (comparator == -1) {
+                mostFit = new Network(prevGeneration.get(prevGeneration.size() - 1));
             }
+
+            nextGeneration.add(mostFit);
         }
+
+        Collections.sort(nextGeneration);
+        Network best = nextGeneration.get(nextGeneration.size() - 1);
+        if (best.getFitness() >= this.bestNet.getFitness()) {
+            this.bestNet = new Network(best);
+        }
+        System.out.println("new gen best = " + nextGeneration.get(nextGeneration.size() - 1).getFitness());
         return nextGeneration;
+
     }
 }
