@@ -1,9 +1,10 @@
 package neuralNetworkTrainer;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Random;
 
-public class IndividualES implements Comparable {
+public class IndividualES implements Comparable<IndividualES> {
     private ArrayList<ArrayList<Double>> genome;
     private ArrayList<ArrayList<Double>> strategyParams;
     private Network network;
@@ -26,6 +27,12 @@ public class IndividualES implements Comparable {
                 this.strategyParams.add(stratChrom);
             }
         }
+    }
+
+    public IndividualES(IndividualES copy){
+        strategyParams = new ArrayList<>(copy.strategyParams);
+        genome = new ArrayList<>(copy.genome);
+        network = copy.network;
     }
 
     public ArrayList<ArrayList<Double>> getGenome() {
@@ -53,7 +60,14 @@ public class IndividualES implements Comparable {
     }
 
     @Override
-    public int compareTo(Object o) {
-        return (int)(this.network.getFitness() - ((IndividualES) o).getNetwork().getFitness());
+    public int compareTo(IndividualES individual) {
+
+        if (this.network.getFitness() < individual.getNetwork().getFitness()) {
+            return -1;
+        } else if (this.network.getFitness() > individual.getNetwork().getFitness()) {
+            return 1;
+        } else {
+            return 0;
+        }
     }
 }
