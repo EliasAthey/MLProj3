@@ -233,7 +233,7 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 	 */
 	private ArrayList<Network> evalFitness(ArrayList<Network> population){
 
-		ArrayList<ArrayList<Object>> evalSet = Driver.dataset.getEvalDataSet(0);
+		ArrayList<ArrayList<Object>> evalSet = Driver.dataset.getEvalDataSet2(100);
 
 		for(Network individual: population) {
 			double fitness = 0;
@@ -245,6 +245,7 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 			}
 
 			fitness = fitness/evalSet.size();
+			System.out.println(fitness);
 			individual.setFitness(fitness);
 		}
 
