@@ -147,7 +147,7 @@ public class DifferentialEvolution extends TrainingAlgorithm {
 
 			// iterate through each weight, randomly (uniformly) swap p1 weight with p2 weight
 			for(int weightIter = 0; weightIter < p1.get(nodeIter).size(); weightIter++){
-				if(Math.random() < Driver.mutationRate){
+				if(Math.random() < 0.5){
 					p1.get(nodeIter).remove(weightIter);
 					p1.get(nodeIter).add(weightIter, p2.get(nodeIter).get(weightIter));
 				}
